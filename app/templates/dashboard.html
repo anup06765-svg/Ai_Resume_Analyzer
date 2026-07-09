@@ -1,0 +1,283 @@
+{% extends "dashboard_base.html" %}
+
+{% block title %}
+AI Resume Dashboard
+{% endblock %}
+
+{% block content %}
+
+<div class="dashboard">
+
+    <!-- ================= Sidebar ================= -->
+
+    <aside class="sidebar">
+
+        <div class="logo">
+            <h2>AI Resume</h2>
+        </div>
+
+        <ul class="menu">
+
+            <li class="active">
+                <a href="/dashboard">
+                    <i class="fa-solid fa-house"></i>
+                    Dashboard
+                </a>
+            </li>
+
+            <li>
+                <a href="/resume/upload">
+                    <i class="fa-solid fa-upload"></i>
+                    Upload Resume
+                </a>
+            </li>
+
+            <li>
+                <a href="/resume/history">
+                    <i class="fa-solid fa-folder-open"></i>
+                    Resume History
+                </a>
+            </li>
+
+            <li>
+                <a href="/ats">
+                    <i class="fa-solid fa-chart-line"></i>
+                    ATS Score
+                </a>
+            </li>
+
+            <li>
+                <a href="/job-matching">
+                    <i class="fa-solid fa-briefcase"></i>
+                    Job Matching
+                </a>
+            </li>
+
+            <li>
+                <a href="/ai-analysis">
+                    <i class="fa-solid fa-robot"></i>
+                    AI Analysis
+                </a>
+            </li>
+
+            <li>
+                <a href="/profile">
+                    <i class="fa-solid fa-user"></i>
+                    Profile
+                </a>
+            </li>
+
+            <li>
+                <a href="/logout">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                    Logout
+                </a>
+            </li>
+
+        </ul>
+
+    </aside>
+
+    <!-- ================= Main ================= -->
+
+    <div class="main-content">
+
+        <!-- Top Navbar -->
+
+        <div class="topbar">
+
+            <div class="search-box">
+
+                <input
+                    type="text"
+                    placeholder="Search anything..."
+                >
+
+            </div>
+
+            <div class="top-right">
+
+                <button class="notify-btn">
+                    🔔
+                </button>
+
+                <div class="profile-box">
+
+                    <div class="avatar">
+                        {{ user.full_name[0] }}
+                    </div>
+
+                    <div>
+
+                        <strong>{{ user.full_name }}</strong>
+
+                        <small>{{ user.email }}</small>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- Welcome -->
+
+        <div class="welcome">
+
+            <h1>
+                Welcome Back,
+                {{ user.full_name }}
+            </h1>
+
+            <p>
+                Analyze your resume and improve your ATS score using AI.
+            </p>
+
+        </div>
+
+        <!-- ATS + Summary -->
+
+        <div class="dashboard-grid">
+
+            <!-- ATS Gauge -->
+
+            <div class="ats-card">
+
+                <h2>ATS Score</h2>
+
+                <div class="gauge">
+
+                    <svg width="220" height="220">
+
+                        <circle
+                            cx="110"
+                            cy="110"
+                            r="90"
+                            class="bg-circle"
+                        ></circle>
+
+                        <circle
+                            cx="110"
+                            cy="110"
+                            r="90"
+                            class="progress-circle"
+                            stroke-dasharray="565"
+                            stroke-dashoffset="{{ ats_offset }}"
+                        ></circle>
+
+                    </svg>
+
+                    <div class="score-text">
+
+                        <h1>
+                            {{ ats_score }}
+                        </h1>
+
+                        <span>/100</span>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- Quick Stats -->
+
+            <div class="summary">
+
+                <div class="summary-card">
+
+                    <h3>Total Resumes</h3>
+
+                    <h1>{{ total_resumes }}</h1>
+
+                </div>
+
+                <div class="summary-card">
+
+                    <h3>Matched Skills</h3>
+
+                    <h1>{{ matched_skills }}</h1>
+
+                </div>
+
+                <div class="summary-card">
+
+                    <h3>Missing Skills</h3>
+
+                    <h1>{{ missing_skills }}</h1>
+
+                </div>
+
+                <div class="summary-card">
+
+                    <h3>Job Match</h3>
+
+                    <h1>{{ ats_match }}%</h1>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- Quick Actions -->
+
+        <div class="actions">
+
+            <a href="/resume/upload" class="action-card">
+
+                📄
+
+                <h3>Upload Resume</h3>
+
+            </a>
+
+            <a href="/resume/history" class="action-card">
+
+                📁
+
+                <h3>Resume History</h3>
+
+            </a>
+
+            <a href="/ats" class="action-card">
+
+                📊
+
+                <h3>ATS Report</h3>
+
+            </a>
+
+            <a href="/job-matching" class="action-card">
+
+                💼
+
+                <h3>Job Matching</h3>
+
+            </a>
+
+            <a href="/ai-analysis" class="action-card">
+
+                🤖
+
+                <h3>AI Suggestions</h3>
+
+            </a>
+
+            <a href="/profile" class="action-card">
+
+                👤
+
+                <h3>Profile</h3>
+
+            </a>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

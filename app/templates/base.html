@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>
+        {% block title %}
+        AI Resume Analyzer
+        {% endblock %}
+    </title>
+
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+
+    <!-- Main CSS -->
+    <link rel="stylesheet" href="/static/css/style.css">
+
+    <!-- Auth CSS -->
+    <link rel="stylesheet" href="/static/css/auth.css">
+
+    <link rel="stylesheet" href="/static/css/dashboard.css">
+</head>
+
+<body>
+{% if request.url.path != "/dashboard" %}
+<header class="navbar">
+
+    <div class="logo">
+
+        <a href="/">AI Resume Analyzer</a>
+
+    </div>
+
+    <nav>
+
+        <a href="/">Home</a>
+
+        <a href="#about">About</a>
+
+        <a href="#features">Features</a>
+
+        <a href="#contact">Contact</a>
+
+        {% if request.session.get("user_id") %}
+
+            <a href="/dashboard">Dashboard</a>
+
+            <a href="/auth/logout" class="nav-btn logout">
+
+                Logout
+
+            </a>
+
+        {% else %}
+
+            <a href="/auth/login">Login</a>
+
+            <a href="/auth/register" class="nav-btn">
+
+                Register
+
+            </a>
+
+        {% endif %}
+
+    </nav>
+
+
+</header>
+{% endif %}
+
+<main>
+
+    {% block content %}
+
+    {% endblock %}
+
+</main>
+{% if request.url.path != "/dashboard" %}
+<footer id="contact">
+
+    <div class="footer-content">
+
+        <h3>AI Resume Analyzer</h3>
+
+        <p>
+
+            Analyze your resume using Artificial Intelligence,
+            improve ATS score and get professional suggestions.
+
+        </p>
+
+        <p>
+
+            © 2026 AI Resume Analyzer. All Rights Reserved.
+
+        </p>
+
+    </div>
+
+</footer>
+{% endif %}
+<script src="/static/js/dashboard.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+
+{% block title %}
+Upload Resume
+{% endblock %}
+
+{% block content %}
+
+<div class="container">
+
+    <div class="upload-card">
+
+        <h1>AI Resume Analyzer</h1>
+
+        <h3>Upload Your Resume</h3>
+
+        {% if error %}
+            <div class="alert alert-danger">
+                {{ error }}
+            </div>
+        {% endif %}
+
+        {% if success %}
+            <div class="alert alert-success">
+                {{ success }}
+            </div>
+        {% endif %}
+
+        <form
+            action="/resume/upload"
+            method="POST"
+            enctype="multipart/form-data"
+        >
+
+            <div class="upload-box">
+
+                    <input
+                        type="file"
+                        name="resume"
+                        accept=".pdf"
+                        required
+                    >
+
+                    <p>
+                        📄 Choose your Resume (PDF Only)
+                    </p>
+
+                    <p>
+                        Maximum File Size: 5 MB
+                    </p>
+
+                </div>
+
+            <button type="submit" class="btn-upload">
+                Upload Resume
+            </button>
+
+        </form>
+
+        <hr>
+
+        <div class="upload-info">
+
+            <h4>Upload Rules</h4>
+
+            <ul>
+                <li>Only PDF files are allowed.</li>
+                <li>Maximum size: 5 MB.</li>
+                <li>Your resume will be securely stored.</li>
+                <li>AI analysis will start after upload (next step).</li>
+            </ul>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}
