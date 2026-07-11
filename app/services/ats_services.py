@@ -3,215 +3,110 @@ ATS Scoring Service
 Production Level
 """
 
-from typing import Dict, List
+from typing import Dict
+from app.services.nlp_service import NLPService
 
 
-class ATSScorer:
-    """
-    Calculates ATS Score based on extracted resume data.
-    """
+class ATSService:
+    REQUIRED_SKILLS = [
+        "python","django","fastapi","flask","html","css","javascript",
+        "sql","mysql","mongodb","git","github","docker","linux","rest api"
+    ]
 
-    def __init__(self):
+    @classmethod
+    def _grade(cls, score:int)->str:
+        if score>=90: return "A+"
+        if score>=80: return "A"
+        if score>=70: return "B"
+        if score>=60: return "C"
+        if score>=50: return "D"
+        return "F"
 
-        self.weights = {
+    @classmethod
+    def calculate(cls, resume_text:str)->Dict:
+        if not resume_text:
+            return {
+                "ats_score":0,
+                "ats_grade":"F",
+                "analysis":{},
+                "matched_skills":[],
+                "missing_skills":cls.REQUIRED_SKILLS,
+                "suggestions":["Resume text is empty."]
+            }
 
-            "contact": 10,
-            "skills": 25,
-            "education": 15,
-            "experience": 20,
-            "projects": 10,
-            "certificates": 10,
-            "keywords": 10
+        analysis = NLPService.analyze_resume(resume_text)
 
-        }
+        skills = analysis.get("skills",[])
+        education = analysis.get("education",[])
+        experience = analysis.get("experience",[])
+        projects = analysis.get("projects",[])
+        certificates = analysis.get("certificates",[])
+        keywords = analysis.get("keywords",[])
+        word_count = analysis.get("word_count",0)
 
-    # -----------------------------------------
-    # Main Function
-    # -----------------------------------------
-
-    def calculate_score(self, data: Dict) -> Dict:
-
-        scores = {}
-
-        scores["contact"] = self.contact_score(data)
-
-        scores["skills"] = self.skills_score(data)
-
-        scores["education"] = self.education_score(data)
-
-        scores["experience"] = self.experience_score(data)
-
-        scores["projects"] = self.projects_score(data)
-
-        scores["certificates"] = self.certificates_score(data)
-
-        scores["keywords"] = self.keyword_score(data)
-
-        total = sum(scores.values())
-
-        if total > 100:
-            total = 100
-
-        return {
-
-            "ats_score": total,
-
-            "breakdown": scores,
-
-            "grade": self.grade(total)
-
-        }
-
-    # -----------------------------------------
-    # Contact
-    # -----------------------------------------
-
-    def contact_score(self, data):
+        matched = [s for s in cls.REQUIRED_SKILLS if s in [x.lower() for x in skills]]
+        missing = [s for s in cls.REQUIRED_SKILLS if s not in matched]
 
         score = 0
+        suggestions = []
 
-        if data.get("name"):
-            score += 2
+        score += min(40, int((len(matched)/len(cls.REQUIRED_SKILLS))*40))
 
-        if data.get("email"):
+        if word_count >= 500:
+            score += 20
+        elif word_count >= 350:
+            score += 16
+        elif word_count >= 250:
+            score += 12
+        elif word_count >= 150:
+            score += 8
+            suggestions.append("Increase resume length to 400-500 words.")
+        else:
             score += 4
+            suggestions.append("Resume is too short.")
 
-        if data.get("phone"):
-            score += 4
+        score += 10 if education else 0
+        if not education:
+            suggestions.append("Add education details.")
 
-        return score
+        score += 10 if projects else 0
+        if not projects:
+            suggestions.append("Add project section.")
 
-    # -----------------------------------------
-    # Skills
-    # -----------------------------------------
+        score += 10 if experience else 0
+        if not experience:
+            suggestions.append("Add internship/work experience.")
 
-    def skills_score(self, data):
+        contact = 0
+        if analysis.get("email"):
+            contact += 5
+        else:
+            suggestions.append("Email address not found.")
+        if analysis.get("phone"):
+            contact += 5
+        else:
+            suggestions.append("Phone number not found.")
+        score += contact
 
-        skills = data.get("skills", [])
+        score = min(100, score)
 
-        count = len(skills)
+        return {
+            "ats_score": score,
+            "ats_grade": cls._grade(score),
+            "analysis": analysis,
+            "word_count": word_count,
+            "matched_skills": matched,
+            "missing_skills": missing,
+            "breakdown": {
+                "skills": min(40, int((len(matched)/len(cls.REQUIRED_SKILLS))*40)),
+                "resume_length": 20 if word_count>=500 else 16 if word_count>=350 else 12 if word_count>=250 else 8 if word_count>=150 else 4,
+                "education":10 if education else 0,
+                "projects":10 if projects else 0,
+                "experience":10 if experience else 0,
+                "contact":contact
+            },
+            "suggestions": suggestions
+        }
 
-        if count >= 15:
-            return 25
 
-        elif count >= 10:
-            return 20
-
-        elif count >= 5:
-            return 15
-
-        elif count >= 3:
-            return 10
-
-        return 5
-
-    # -----------------------------------------
-    # Education
-    # -----------------------------------------
-
-    def education_score(self, data):
-
-        education = data.get("education", [])
-
-        if len(education) >= 2:
-            return 15
-
-        elif len(education) == 1:
-            return 10
-
-        return 0
-
-    # -----------------------------------------
-    # Experience
-    # -----------------------------------------
-
-    def experience_score(self, data):
-
-        experience = data.get("experience", [])
-
-        if len(experience) >= 3:
-            return 20
-
-        elif len(experience) == 2:
-            return 15
-
-        elif len(experience) == 1:
-            return 10
-
-        return 0
-
-    # -----------------------------------------
-    # Projects
-    # -----------------------------------------
-
-    def projects_score(self, data):
-
-        projects = data.get("projects", [])
-
-        if len(projects) >= 4:
-            return 10
-
-        elif len(projects) >= 2:
-            return 8
-
-        elif len(projects) == 1:
-            return 5
-
-        return 0
-
-    # -----------------------------------------
-    # Certificates
-    # -----------------------------------------
-
-    def certificates_score(self, data):
-
-        certificates = data.get("certificates", [])
-
-        if len(certificates) >= 3:
-            return 10
-
-        elif len(certificates) >= 1:
-            return 7
-
-        return 0
-
-    # -----------------------------------------
-    # Keywords
-    # -----------------------------------------
-
-    def keyword_score(self, data):
-
-        keywords = data.get("keywords", [])
-
-        count = len(keywords)
-
-        if count >= 20:
-            return 10
-
-        elif count >= 10:
-            return 8
-
-        elif count >= 5:
-            return 5
-
-        return 0
-
-    # -----------------------------------------
-    # Grade
-    # -----------------------------------------
-
-    def grade(self, score):
-
-        if score >= 90:
-            return "A+"
-
-        elif score >= 80:
-            return "A"
-
-        elif score >= 70:
-            return "B"
-
-        elif score >= 60:
-            return "C"
-
-        return "Needs Improvement"
+ats_service = ATSService()

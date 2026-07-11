@@ -5,6 +5,8 @@ from fastapi import (
     UploadFile,
     File
 )
+from fastapi.responses import RedirectResponse
+from starlette import status
 
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
@@ -13,8 +15,9 @@ from app.database.database import get_db
 from app.dependencies.auth import login_required
 from app.models.resume import Resume
 
-from app.services.file_service import FileService
+from app.services.file_services import FileService
 from app.services.pdf_parser import PDFParser
+from app.services.analysis_service import AnalysisService
 
 
 router = APIRouter(
@@ -22,9 +25,6 @@ router = APIRouter(
     tags=["Resume"]
 )
 
-templates = Jinja2Templates(
-    directory="app/templates"
-)
 
 
 # ===================================================
@@ -36,6 +36,8 @@ def upload_page(
     request: Request,
     user=Depends(login_required)
 ):
+    templates = request.app.state.templates
+
 
     if hasattr(user, "status_code"):
         return user
@@ -62,6 +64,7 @@ async def upload_resume(
     db: Session = Depends(get_db),
     user=Depends(login_required)
 ):
+    templates = request.app.state.templates
 
     # -------------------------
     # Session Check
@@ -158,6 +161,16 @@ async def upload_resume(
 
         db.refresh(new_resume)
 
+        # -------------------------
+        # Run Analysis
+        # -------------------------
+
+        AnalysisService.analyze_resume(new_resume)
+
+        db.commit()
+
+        db.refresh(new_resume)
+
     except Exception as e:
 
         import traceback
@@ -182,12 +195,7 @@ async def upload_resume(
     # Success
     # -------------------------
 
-    return templates.TemplateResponse(
-        "upload_resume.html",
-        {
-            "request": request,
-            "user": user,
-            "error": None,
-            "success": "Resume uploaded and parsed successfully."
-        }
-    )
+    return RedirectResponse(
+    url="/dashboard/",
+    status_code=status.HTTP_303_SEE_OTHER
+)

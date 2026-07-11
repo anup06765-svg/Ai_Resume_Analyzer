@@ -3,24 +3,27 @@ from fastapi.responses import RedirectResponse
 from fastapi.templating import Jinja2Templates
 
 from sqlalchemy.orm import Session
-
-from passlib.context import CryptContext
+from app.auth.password import hash_password, verify_password
 
 from app.database.database import get_db
 from app.models.user import User
+
+templates = Jinja2Templates(
+    directory="app/templates"
+)
 
 router = APIRouter(
     prefix="/auth",
     tags=["Authentication"]
 )
 
-templates = Jinja2Templates(directory="app/templates")
 
-pwd_context = CryptContext(
-    schemes=["bcrypt"],
-    deprecated="auto"
+
+from app.crud.user_crud import (
+    get_user_by_email,
+    create_user,
+    authenticate_user
 )
-
 
 # ============================
 # Register Page
@@ -28,7 +31,7 @@ pwd_context = CryptContext(
 
 @router.get("/register")
 def register_page(request: Request):
-
+    templates = request.app.state.templates
     return templates.TemplateResponse(
         "register.html",
         {
@@ -57,10 +60,12 @@ def register_user(
     db: Session = Depends(get_db)
 
 ):
+    templates = request.app.state.templates
 
-    existing_user = db.query(User).filter(
-        User.email == email
-    ).first()
+    existing_user = get_user_by_email(
+    db,
+    email
+)
 
     if existing_user:
 
@@ -73,21 +78,12 @@ def register_user(
             }
         )
 
-    hashed_password = pwd_context.hash(password)
-
-    user = User(
-
-        full_name=full_name,
-
-        email=email,
-
-        password=hashed_password
-
-    )
-
-    db.add(user)
-
-    db.commit()
+    create_user(
+    db=db,
+    full_name=full_name,
+    email=email,
+    password=password
+)
 
     return RedirectResponse(
 
@@ -104,6 +100,7 @@ def register_user(
 
 @router.get("/login")
 def login_page(request: Request):
+    templates = request.app.state.templates
 
     return templates.TemplateResponse(
 
@@ -134,42 +131,32 @@ def login_user(
     db: Session = Depends(get_db)
 
 ):
+    templates = request.app.state.templates
 
-    user = db.query(User).filter(
-        User.email == email
-    ).first()
+    user = authenticate_user(
+    db=db,
+    email=email,
+    password=password
+)
 
     if user is None:
 
         return templates.TemplateResponse(
+        "login.html",
+        {
+            "request": request,
+            "error": "Invalid Email or Password",
+            "success": None
+        }
+    )
 
-            "login.html",
-
-            {
-                "request": request,
-                "error": "Invalid Email or Password",
-                "success": None
-            }
-
-        )
-
-    if not pwd_context.verify(password, user.password):
-
-        return templates.TemplateResponse(
-
-            "login.html",
-
-            {
-                "request": request,
-                "error": "Invalid Email or Password",
-                "success": None
-            }
-
-        )
+    
 
     request.session["user_id"] = user.id
 
     request.session["user_name"] = user.full_name
+
+    print("LOGIN SESSION:", dict(request.session))
 
     return RedirectResponse(
 

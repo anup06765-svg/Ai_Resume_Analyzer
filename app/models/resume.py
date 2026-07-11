@@ -26,6 +26,14 @@ class Resume(Base):
 
     analysis_result = Column(Text, nullable=True)
 
+    word_count = Column(Integer, default=0)
+
+    matched_skills = Column(Integer, default=0)
+
+    missing_skills = Column(Integer, default=0)
+
+    suggestions = Column(Text, nullable=True)
+
     # ==========================
     # User
     # ==========================

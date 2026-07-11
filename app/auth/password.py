@@ -7,7 +7,7 @@ pwd_context = CryptContext(
 )
 
 
-def hash_password(password: str):
+def hash_password(password: str) -> str :
     """
     Convert plain password into hashed password
     """
@@ -18,7 +18,7 @@ def hash_password(password: str):
 def verify_password(
     plain_password: str,
     hashed_password: str
-):
+) -> bool:
     """
     Verify entered password
     """

@@ -19,7 +19,7 @@ AI Resume Dashboard
         <ul class="menu">
 
             <li class="active">
-                <a href="/dashboard">
+                <a href="/dashboard/">
                     <i class="fa-solid fa-house"></i>
                     Dashboard
                 </a>
@@ -42,7 +42,7 @@ AI Resume Dashboard
             <li>
                 <a href="/ats">
                     <i class="fa-solid fa-chart-line"></i>
-                    ATS Score
+                    ATS Report
                 </a>
             </li>
 
@@ -56,7 +56,7 @@ AI Resume Dashboard
             <li>
                 <a href="/ai-analysis">
                     <i class="fa-solid fa-robot"></i>
-                    AI Analysis
+                    AI Suggestions
                 </a>
             </li>
 
@@ -68,7 +68,7 @@ AI Resume Dashboard
             </li>
 
             <li>
-                <a href="/logout">
+                <a href="/auth/logout">
                     <i class="fa-solid fa-right-from-bracket"></i>
                     Logout
                 </a>
@@ -78,11 +78,11 @@ AI Resume Dashboard
 
     </aside>
 
-    <!-- ================= Main ================= -->
+    <!-- ================= Main Content ================= -->
 
     <div class="main-content">
 
-        <!-- Top Navbar -->
+        <!-- ================= Top Navbar ================= -->
 
         <div class="topbar">
 
@@ -90,7 +90,7 @@ AI Resume Dashboard
 
                 <input
                     type="text"
-                    placeholder="Search anything..."
+                    placeholder="Search Resume..."
                 >
 
             </div>
@@ -104,14 +104,24 @@ AI Resume Dashboard
                 <div class="profile-box">
 
                     <div class="avatar">
+
                         {{ user.full_name[0] }}
+
                     </div>
 
                     <div>
 
-                        <strong>{{ user.full_name }}</strong>
+                        <strong>
 
-                        <small>{{ user.email }}</small>
+                            {{ user.full_name }}
+
+                        </strong>
+
+                        <small>
+
+                            {{ user.email }}
+
+                        </small>
 
                     </div>
 
@@ -121,26 +131,31 @@ AI Resume Dashboard
 
         </div>
 
-        <!-- Welcome -->
+        <!-- ================= Welcome ================= -->
 
         <div class="welcome">
 
             <h1>
+
                 Welcome Back,
                 {{ user.full_name }}
+
             </h1>
 
             <p>
-                Analyze your resume and improve your ATS score using AI.
+
+                Upload your resume and improve your ATS Score
+                using Artificial Intelligence.
+
             </p>
 
         </div>
 
-        <!-- ATS + Summary -->
+        <!-- ================= ATS + Summary ================= -->
 
         <div class="dashboard-grid">
 
-            <!-- ATS Gauge -->
+            <!-- ATS Score -->
 
             <div class="ats-card">
 
@@ -151,27 +166,37 @@ AI Resume Dashboard
                     <svg width="220" height="220">
 
                         <circle
+
                             cx="110"
                             cy="110"
                             r="90"
-                            class="bg-circle"
-                        ></circle>
+
+                            class="bg-circle">
+
+                        </circle>
 
                         <circle
+
                             cx="110"
                             cy="110"
                             r="90"
+
                             class="progress-circle"
+
                             stroke-dasharray="565"
-                            stroke-dashoffset="{{ ats_offset }}"
-                        ></circle>
+
+                            stroke-dashoffset="{{ ats_offset }}">
+
+                        </circle>
 
                     </svg>
 
                     <div class="score-text">
 
                         <h1>
+
                             {{ ats_score }}
+
                         </h1>
 
                         <span>/100</span>
@@ -180,9 +205,15 @@ AI Resume Dashboard
 
                 </div>
 
+                <h3>
+
+                    Grade : {{ ats_grade }}
+
+                </h3>
+
             </div>
 
-            <!-- Quick Stats -->
+            <!-- ================= Summary Cards ================= -->
 
             <div class="summary">
 
@@ -190,7 +221,11 @@ AI Resume Dashboard
 
                     <h3>Total Resumes</h3>
 
-                    <h1>{{ total_resumes }}</h1>
+                    <h1>
+
+                        {{ total_resumes }}
+
+                    </h1>
 
                 </div>
 
@@ -198,7 +233,11 @@ AI Resume Dashboard
 
                     <h3>Matched Skills</h3>
 
-                    <h1>{{ matched_skills }}</h1>
+                    <h1>
+
+                        {{ matched_skills|length }}
+
+                    </h1>
 
                 </div>
 
@@ -206,7 +245,11 @@ AI Resume Dashboard
 
                     <h3>Missing Skills</h3>
 
-                    <h1>{{ missing_skills }}</h1>
+                    <h1>
+
+                        {{ missing_skills|length }}
+
+                    </h1>
 
                 </div>
 
@@ -214,7 +257,11 @@ AI Resume Dashboard
 
                     <h3>Job Match</h3>
 
-                    <h1>{{ ats_match }}%</h1>
+                    <h1>
+
+                        {{ job_match }}%
+
+                    </h1>
 
                 </div>
 
@@ -222,57 +269,506 @@ AI Resume Dashboard
 
         </div>
 
-        <!-- Quick Actions -->
+        <!-- ================= Resume Analytics ================= -->
+                <div class="analytics-section">
 
-        <div class="actions">
+            <h2>Resume Analytics</h2>
 
-            <a href="/resume/upload" class="action-card">
+            <div class="analytics-grid">
 
-                📄
+                <!-- Resume Strength -->
 
-                <h3>Upload Resume</h3>
+                <div class="analytics-card">
 
-            </a>
+                    <h3>Resume Strength</h3>
 
-            <a href="/resume/history" class="action-card">
+                    <h1>{{ ats_grade }}</h1>
 
-                📁
+                    <p>
 
-                <h3>Resume History</h3>
+                        ATS Score :
+                        {{ ats_score }}/100
 
-            </a>
+                    </p>
 
-            <a href="/ats" class="action-card">
+                </div>
 
-                📊
+                <!-- Word Count -->
 
-                <h3>ATS Report</h3>
+                <div class="analytics-card">
 
-            </a>
+                    <h3>Resume Words</h3>
 
-            <a href="/job-matching" class="action-card">
+                    <h1>
 
-                💼
+                        {{ word_count }}
 
-                <h3>Job Matching</h3>
+                    </h1>
 
-            </a>
+                    <p>
 
-            <a href="/ai-analysis" class="action-card">
+                        Recommended :
+                        400-600 Words
 
-                🤖
+                    </p>
 
-                <h3>AI Suggestions</h3>
+                </div>
 
-            </a>
+                <!-- Matched Skills -->
 
-            <a href="/profile" class="action-card">
+                <div class="analytics-card">
 
-                👤
+                    <h3>Matched Skills</h3>
 
-                <h3>Profile</h3>
+                    <h1>
 
-            </a>
+                        {{ matched_skills |length }}
+
+                    </h1>
+
+                    <p>
+
+                        Skills detected from Resume
+
+                    </p>
+
+                </div>
+
+                <!-- Missing Skills -->
+
+                <div class="analytics-card">
+
+                    <h3>Missing Skills</h3>
+
+                    <h1>
+
+                        {{ missing_skills|length }}
+
+                    </h1>
+
+                    <p>
+
+                        Add these skills to improve ATS
+
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- ================= Latest Resume ================= -->
+
+        <div class="resume-details">
+
+            <div class="detail-box">
+
+                <h2>
+
+                    Latest Resume
+
+                </h2>
+
+                {% if latest_resume %}
+
+                <table class="resume-table">
+
+                    <tr>
+
+                        <td>
+
+                            <strong>File Name</strong>
+
+                        </td>
+
+                        <td>
+
+                            {{ latest_resume.filename }}
+
+                        </td>
+
+                    </tr>
+
+                    <tr>
+
+                        <td>
+
+                            <strong>ATS Score</strong>
+
+                        </td>
+
+                        <td>
+
+                            {{ ats_score }}/100
+
+                        </td>
+
+                    </tr>
+
+                    <tr>
+
+                        <td>
+
+                            <strong>Grade</strong>
+
+                        </td>
+
+                        <td>
+
+                            {{ ats_grade }}
+
+                        </td>
+
+                    </tr>
+
+                    <tr>
+
+                        <td>
+
+                            <strong>Status</strong>
+
+                        </td>
+
+                        <td>
+
+                            ✅ Resume Analyzed
+
+                        </td>
+
+                    </tr>
+
+                </table>
+
+                {% else %}
+
+                <div class="empty-state">
+
+                    <h3>
+
+                        No Resume Uploaded Yet
+
+                    </h3>
+
+                    <p>
+
+                        Upload your first resume to see
+                        complete AI analysis.
+
+                    </p>
+
+                    <a
+                        href="/resume/upload"
+                        class="btn"
+                    >
+
+                        Upload Resume
+
+                    </a>
+
+                </div>
+
+                {% endif %}
+
+            </div>
+
+        </div>
+
+        <!-- ================= AI Insights ================= -->
+
+        <div class="analytics-section">
+
+            <h2>
+
+                AI Resume Insights
+
+            </h2>
+
+            <div class="analytics-grid">
+
+                <div class="analytics-card">
+
+                    <h3>
+
+                        ATS Grade
+
+                    </h3>
+
+                    <h1>
+
+                        {{ ats_grade }}
+
+                    </h1>
+
+                </div>
+
+                <div class="analytics-card">
+
+                    <h3>
+
+                        Resume Score
+
+                    </h3>
+
+                    <h1>
+
+                        {{ ats_score }}%
+
+                    </h1>
+
+                </div>
+
+                <div class="analytics-card">
+
+                    <h3>
+
+                        Resume Status
+
+                    </h3>
+
+                    <h1>
+
+                        {% if ats_score >= 80 %}
+
+                        Excellent
+
+                        {% elif ats_score >= 60 %}
+
+                        Good
+
+                        {% else %}
+
+                        Needs Improvement
+
+                        {% endif %}
+
+                    </h1>
+
+                </div>
+
+                <div class="analytics-card">
+
+                    <h3>
+
+                        AI Recommendation
+
+                    </h3>
+
+                    <h1>
+
+                        {% if ats_score >= 80 %}
+
+                        Ready
+
+                        {% else %}
+
+                        Improve
+
+                        {% endif %}
+
+                    </h1>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- ================= Skill Analysis ================= -->
+                <div class="analytics-section">
+
+            <h2>Skill Analysis</h2>
+
+            <div class="skill-progress">
+
+                <div class="progress-item">
+
+                    <div class="progress-header">
+
+                        <span>ATS Optimization</span>
+
+                        <span>{{ ats_score }}%</span>
+
+                    </div>
+
+                    <div class="progress-bar">
+
+                        <div
+                            class="progress-fill"
+                            style="width: {{ ats_score }}%;"
+                        ></div>
+
+                    </div>
+
+                </div>
+
+                <div class="progress-item">
+
+                    <div class="progress-header">
+
+                        <span>Job Match</span>
+
+                        <span>{{ job_match }}%</span>
+
+                    </div>
+
+                    <div class="progress-bar">
+
+                        <div
+                            class="progress-fill"
+                            style="width: {{ job_match }}%;"
+                        ></div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- ================= Resume Tips ================= -->
+
+        <div class="analytics-section">
+
+            <h2>AI Resume Tips</h2>
+
+            <div class="tips-grid">
+
+                {% if ats_score >= 90 %}
+
+                    <div class="tip-card success">
+
+                        🏆 Excellent Resume
+
+                        <p>
+
+                            Your resume is highly ATS optimized.
+
+                        </p>
+
+                    </div>
+
+                {% elif ats_score >= 75 %}
+
+                    <div class="tip-card info">
+
+                        👍 Good Resume
+
+                        <p>
+
+                            Add more relevant keywords and projects.
+
+                        </p>
+
+                    </div>
+
+                {% elif ats_score >= 60 %}
+
+                    <div class="tip-card warning">
+
+                        ⚠ Resume Needs Improvement
+
+                        <p>
+
+                            Improve skills, projects and formatting.
+
+                        </p>
+
+                    </div>
+
+                {% else %}
+
+                    <div class="tip-card danger">
+
+                        ❌ Low ATS Score
+
+                        <p>
+
+                            Add projects, skills, education and
+                            internship details.
+
+                        </p>
+
+                    </div>
+
+                {% endif %}
+
+            </div>
+
+        </div>
+
+
+        <!-- ================= Quick Actions ================= -->
+
+        <div class="analytics-section">
+
+            <h2>Quick Actions</h2>
+
+            <div class="analytics-grid">
+
+                <a
+                    href="/resume/upload"
+                    class="analytics-card"
+                >
+
+                    <h3>📄 Upload New Resume</h3>
+
+                    <p>
+
+                        Analyze another resume
+
+                    </p>
+
+                </a>
+
+                <a
+                    href="/resume/history"
+                    class="analytics-card"
+                >
+
+                    <h3>📁 Resume History</h3>
+
+                    <p>
+
+                        View uploaded resumes
+
+                    </p>
+
+                </a>
+
+                <a
+                    href="/dashboard/"
+                    class="analytics-card"
+                >
+
+                    <h3>📊 Refresh Dashboard</h3>
+
+                    <p>
+
+                        Reload latest analysis
+
+                    </p>
+
+                </a>
+
+                <a
+                    href="/profile"
+                    class="analytics-card"
+                >
+
+                    <h3>👤 Profile</h3>
+
+                    <p>
+
+                        Manage your account
+
+                    </p>
+
+                </a>
+
+            </div>
 
         </div>
 

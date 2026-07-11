@@ -1,173 +1,511 @@
+"""
+NLP Service
+Production Level Resume Information Extractor
+
+Features:
+- Name extraction
+- Email extraction
+- Phone extraction
+- Skills extraction
+- Education extraction
+- Experience extraction
+- Project extraction
+- Certificate extraction
+- Keyword extraction
+- Word count
+"""
+
 import re
-import spacy
 from typing import Dict, List
 
-# Load spaCy model only once
 try:
-    nlp = spacy.load("en_core_web_sm")
-except Exception:
+    import spacy
+
+    try:
+        nlp = spacy.load("en_core_web_sm")
+    except Exception:
+        nlp = None
+
+except ImportError:
     nlp = None
 
 
-class ResumeNLPService:
+class NLPService:
+
+    # ----------------------------------------
+    # Skills Database
+    # ----------------------------------------
 
     SKILLS = {
-        "python", "java", "c", "c++", "django", "fastapi", "flask",
-        "html", "css", "javascript", "react", "node", "mysql",
-        "postgresql", "mongodb", "sqlite", "git", "github",
-        "docker", "kubernetes", "aws", "azure", "linux",
-        "machine learning", "deep learning", "tensorflow",
-        "pytorch", "opencv", "pandas", "numpy", "matplotlib",
-        "sql", "rest api", "api", "data structures",
-        "oop", "dbms"
+
+        "python",
+        "java",
+        "c",
+        "c++",
+
+        "html",
+        "css",
+        "javascript",
+        "typescript",
+
+        "django",
+        "fastapi",
+        "flask",
+
+        "react",
+        "node",
+
+        "mysql",
+        "postgresql",
+        "mongodb",
+        "sqlite",
+
+        "git",
+        "github",
+
+        "docker",
+        "kubernetes",
+
+        "linux",
+
+        "aws",
+        "azure",
+
+        "machine learning",
+        "deep learning",
+        "natural language processing",
+        "nlp",
+
+        "tensorflow",
+        "pytorch",
+
+        "opencv",
+
+        "numpy",
+        "pandas",
+        "matplotlib",
+
+        "sql",
+
+        "rest api",
+        "api",
+
+        "data structures",
+        "algorithms",
+
+        "oop",
+        "dbms"
+
     }
 
-    EDUCATION = [
+
+    # ----------------------------------------
+    # Education Keywords
+    # ----------------------------------------
+
+    EDUCATION_KEYWORDS = [
+
         "b.tech",
         "btech",
         "b.e",
         "be",
+
         "m.tech",
         "mtech",
+
         "bca",
         "mca",
+
         "b.sc",
         "msc",
+
+        "bachelor",
+        "master",
+
         "computer science",
         "information technology",
-        "engineering"
+
+        "engineering",
+
+        "university",
+        "college"
+
     ]
 
-    PROJECT_KEYWORDS = [
-        "project",
-        "projects",
-        "internship",
-        "experience"
+
+    # ----------------------------------------
+    # Certificate Keywords
+    # ----------------------------------------
+
+    CERTIFICATE_KEYWORDS = [
+
+        "certificate",
+        "certification",
+
+        "hackerrank",
+        "coursera",
+        "udemy",
+        "nptel",
+
+        "aws certified"
+
     ]
 
-    def extract_email(self, text: str):
 
-        pattern = r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}"
+    # ----------------------------------------
+    # Clean Text
+    # ----------------------------------------
 
-        match = re.search(pattern, text)
+    @staticmethod
+    def clean_text(text: str) -> str:
 
-        return match.group(0) if match else None
+        if not text:
+            return ""
 
-    def extract_phone(self, text: str):
+        text = text.lower()
 
-        pattern = r"(\+?\d[\d\s\-]{8,15}\d)"
+        text = re.sub(
+            r"\s+",
+            " ",
+            text
+        )
 
-        match = re.search(pattern, text)
+        return text.strip()
 
-        return match.group(0) if match else None
 
-    def extract_name(self, text: str):
+    # ----------------------------------------
+    # Name Extraction
+    # ----------------------------------------
 
-        if not nlp:
-            return None
+    @staticmethod
+    def extract_name(text: str):
 
-        doc = nlp(text)
+        if nlp:
 
-        for ent in doc.ents:
-            if ent.label_ == "PERSON":
-                return ent.text
+            try:
 
-        return None
+                doc = nlp(text)
 
-    def extract_skills(self, text: str):
+                for entity in doc.ents:
 
-        text_lower = text.lower()
+                    if entity.label_ == "PERSON":
 
-        found = []
+                        return entity.text
 
-        for skill in self.SKILLS:
-            if skill in text_lower:
-                found.append(skill.title())
+            except Exception:
+                pass
 
-        return sorted(list(set(found)))
-
-    def extract_education(self, text: str):
-
-        text_lower = text.lower()
-
-        education = []
-
-        for item in self.EDUCATION:
-            if item in text_lower:
-                education.append(item.title())
-
-        return sorted(list(set(education)))
-
-    def extract_projects(self, text: str):
 
         lines = text.split("\n")
 
-        projects = []
 
         for line in lines:
 
             line = line.strip()
 
-            if len(line) < 4:
-                continue
 
-            for keyword in self.PROJECT_KEYWORDS:
+            if (
+                len(line) > 3
+                and len(line.split()) <= 4
+                and not "resume" in line.lower()
+            ):
 
-                if keyword.lower() in line.lower():
+                return line
 
-                    projects.append(line)
 
-        return list(set(projects))
+        return ""
 
-    def extract_keywords(self, text: str):
 
-        if not nlp:
-            return []
+    # ----------------------------------------
+    # Email Extraction
+    # ----------------------------------------
 
-        doc = nlp(text)
+    @staticmethod
+    def extract_email(text: str):
 
-        keywords = []
+        pattern = (
+            r"[A-Za-z0-9._%+-]+"
+            r"@[A-Za-z0-9.-]+"
+            r"\.[A-Za-z]{2,}"
+        )
 
-        for token in doc:
 
-            if token.is_stop:
-                continue
+        match = re.search(
+            pattern,
+            text
+        )
 
-            if token.is_punct:
-                continue
 
-            if len(token.text) < 3:
-                continue
+        return match.group(0) if match else ""
 
-            keywords.append(token.text)
 
-        return sorted(list(set(keywords)))
+    # ----------------------------------------
+    # Phone Extraction
+    # ----------------------------------------
 
-    def extract_experience(self, text: str):
+    @staticmethod
+    def extract_phone(text: str):
 
-        pattern = r"(\d+)\+?\s*(years|year|months|month)"
+        pattern = (
+            r"(\+91[\-\s]?)?"
+            r"[6-9]\d{9}"
+        )
 
-        matches = re.findall(pattern, text.lower())
+
+        match = re.search(
+            pattern,
+            text
+        )
+
+
+        return match.group(0) if match else ""
+
+
+    # ----------------------------------------
+    # Skills Extraction
+    # ----------------------------------------
+
+    @classmethod
+    def extract_skills(cls, text: str):
+
+        cleaned = cls.clean_text(text)
+
+        skills = []
+
+
+        for skill in cls.SKILLS:
+
+            if skill in cleaned:
+
+                skills.append(skill)
+
+
+        return sorted(
+            list(set(skills))
+        )
+
+
+    # ----------------------------------------
+    # Education Extraction
+    # ----------------------------------------
+
+    @classmethod
+    def extract_education(cls, text: str):
+
+        cleaned = cls.clean_text(text)
+
+        education = []
+
+
+        for item in cls.EDUCATION_KEYWORDS:
+
+            if item in cleaned:
+
+                education.append(item)
+
+
+        return sorted(
+            list(set(education))
+        )
+
+
+    # ----------------------------------------
+    # Experience Extraction
+    # ----------------------------------------
+
+    @staticmethod
+    def extract_experience(text: str):
 
         experience = []
 
+
+        pattern = (
+            r"\d+\+?\s*"
+            r"(year|years|month|months)"
+        )
+
+
+        matches = re.findall(
+            pattern,
+            text.lower()
+        )
+
+
         for item in matches:
-            experience.append(" ".join(item))
 
-        return experience
+            experience.append(item)
 
-    def analyze_resume(self, text: str) -> Dict:
+
+        keywords = [
+
+            "internship",
+            "intern",
+            "developer",
+            "engineer",
+            "worked",
+            "experience"
+
+        ]
+
+
+        lower = text.lower()
+
+
+        for word in keywords:
+
+            if word in lower:
+
+                experience.append(word)
+
+
+        return sorted(
+            list(set(experience))
+        )
+
+
+    # ----------------------------------------
+    # Projects Extraction
+    # ----------------------------------------
+
+    @staticmethod
+    def extract_projects(text: str):
+
+        projects = []
+
+
+        keywords = [
+
+            "project",
+            "projects",
+            "developed",
+            "built",
+            "github"
+
+        ]
+
+
+        lines = text.split("\n")
+
+
+        for line in lines:
+
+            for keyword in keywords:
+
+                if keyword in line.lower():
+
+                    projects.append(
+                        line.strip()
+                    )
+
+
+        return list(
+            set(projects)
+        )
+
+
+    # ----------------------------------------
+    # Certificates
+    # ----------------------------------------
+
+    @classmethod
+    def extract_certificates(cls, text: str):
+
+        cleaned = cls.clean_text(text)
+
+        certificates = []
+
+
+        for item in cls.CERTIFICATE_KEYWORDS:
+
+            if item in cleaned:
+
+                certificates.append(item)
+
+
+        return sorted(
+            list(set(certificates))
+        )
+
+
+    # ----------------------------------------
+    # Keyword Extraction
+    # ----------------------------------------
+
+    @staticmethod
+    def extract_keywords(text: str):
+
+        words = re.findall(
+            r"[a-zA-Z]{3,}",
+            text.lower()
+        )
+
+
+        return sorted(
+            list(set(words))
+        )
+
+
+    # ----------------------------------------
+    # Word Count
+    # ----------------------------------------
+
+    @staticmethod
+    def word_count(text: str):
+
+        return len(
+            text.split()
+        )
+
+
+    # ----------------------------------------
+    # Complete Resume Analysis
+    # ----------------------------------------
+
+    @classmethod
+    def analyze_resume(
+        cls,
+        text: str
+    ) -> Dict:
+
 
         return {
-            "name": self.extract_name(text),
-            "email": self.extract_email(text),
-            "phone": self.extract_phone(text),
-            "skills": self.extract_skills(text),
-            "education": self.extract_education(text),
-            "experience": self.extract_experience(text),
-            "projects": self.extract_projects(text),
-            "keywords": self.extract_keywords(text),
+
+            "name":
+                cls.extract_name(text),
+
+            "email":
+                cls.extract_email(text),
+
+            "phone":
+                cls.extract_phone(text),
+
+            "skills":
+                cls.extract_skills(text),
+
+            "education":
+                cls.extract_education(text),
+
+            "experience":
+                cls.extract_experience(text),
+
+            "projects":
+                cls.extract_projects(text),
+
+            "certificates":
+                cls.extract_certificates(text),
+
+            "keywords":
+                cls.extract_keywords(text),
+
+            "word_count":
+                cls.word_count(text)
+
         }
 
 
-resume_nlp_service = ResumeNLPService()
+# Service Object
+nlp_service = NLPService()
+
+# Backward compatibility
+resume_nlp_service = NLPService()
+

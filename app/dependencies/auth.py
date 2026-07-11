@@ -10,6 +10,17 @@ def get_current_user(
     request: Request,
     db: Session = Depends(get_db)
 ):
+    print("=" * 50)
+    print("SESSION:", dict(request.session))
+    print("=" * 50)
+
+    user_id = request.session.get("user_id")
+
+    
+def get_current_user(
+    request: Request,
+    db: Session = Depends(get_db)
+):
     user_id = request.session.get("user_id")
 
     if not user_id:

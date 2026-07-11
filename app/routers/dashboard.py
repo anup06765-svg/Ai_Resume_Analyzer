@@ -1,10 +1,12 @@
+import json
+
 from fastapi import APIRouter, Request, Depends
 from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session
 
 from app.database.database import get_db
-from app.models.resume import Resume
 from app.dependencies.auth import login_required
+from app.models.resume import Resume
 
 router = APIRouter(
     prefix="/dashboard",
@@ -34,7 +36,6 @@ def dashboard(
     )
 
     total_resumes = len(resumes)
-
     latest_resume = resumes[0] if resumes else None
 
     # ------------------------------------
@@ -43,28 +44,63 @@ def dashboard(
 
     ats_score = 0
     ats_grade = "N/A"
-    matched_skills = 0
-    missing_skills = 0
+
+    matched_skills = []
+    missing_skills = []
+    suggestions = []
+
+    word_count = 0
     job_match = 0
 
     # ------------------------------------
-    # Latest Resume Data
+    # Load Analysis Result
     # ------------------------------------
 
     if latest_resume:
 
-        ats_score = latest_resume.ats_score
-        ats_grade = latest_resume.ats_grade
+        ats_score = latest_resume.ats_score or 0
+        ats_grade = latest_resume.ats_grade or "N/A"
 
-        # Temporary values
-        # Next step me analysis_result se calculate karenge
+        if latest_resume.analysis_result:
 
-        matched_skills = 12
-        missing_skills = 4
-        job_match = ats_score
+            try:
+
+                analysis = json.loads(
+                    latest_resume.analysis_result
+                )
+
+                matched_skills = analysis.get(
+                    "matched_skills",
+                    []
+                )
+
+                missing_skills = analysis.get(
+                    "missing_skills",
+                    []
+                )
+
+                suggestions = analysis.get(
+                    "suggestions",
+                    []
+                )
+
+                word_count = analysis.get(
+                    "word_count",
+                    0
+                )
+
+                job_match = ats_score
+
+            except Exception:
+
+                matched_skills = []
+                missing_skills = []
+                suggestions = []
+                word_count = 0
+                job_match = ats_score
 
     # ------------------------------------
-    # Circular Gauge
+    # ATS Gauge
     # ------------------------------------
 
     radius = 90
@@ -75,7 +111,7 @@ def dashboard(
     ) * circumference
 
     # ------------------------------------
-    # Dashboard
+    # Render Dashboard
     # ------------------------------------
 
     return request.app.state.templates.TemplateResponse(
@@ -88,21 +124,25 @@ def dashboard(
 
             "user": user,
 
+            "total_resumes": total_resumes,
+
+            "latest_resume": latest_resume,
+
             "ats_score": ats_score,
 
             "ats_grade": ats_grade,
 
             "ats_offset": ats_offset,
 
-            "total_resumes": total_resumes,
-
             "matched_skills": matched_skills,
 
             "missing_skills": missing_skills,
 
-            "job_match": job_match,
+            "suggestions": suggestions,
 
-            "latest_resume": latest_resume
+            "word_count": word_count,
+
+            "job_match": job_match
 
         }
 

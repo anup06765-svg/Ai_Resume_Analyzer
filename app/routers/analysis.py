@@ -1,13 +1,17 @@
+import json
+from pathlib import Path
+
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-import json
 
 from app.database.database import get_db
+from app.dependencies.auth import login_required
 from app.models.resume import Resume
 
 from app.services.pdf_parser import PDFParser
 from app.services.nlp_service import resume_nlp_service
-from app.services.ats_services import ATSScorer
+from app.services.ats_services import ATSService
+
 router = APIRouter(
     prefix="/analysis",
     tags=["Analysis"]
@@ -17,35 +21,69 @@ router = APIRouter(
 @router.post("/run/{resume_id}")
 def analyze_resume(
     resume_id: int,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    user=Depends(login_required)
 ):
+    """
+    Analyze uploaded resume and save ATS result.
+    """
 
     # -----------------------------------
-    # Find Resume
+    # Login Check
+    # -----------------------------------
+
+    if hasattr(user, "status_code"):
+        return user
+
+    # -----------------------------------
+    # Resume Ownership Check
     # -----------------------------------
 
     resume = (
         db.query(Resume)
-        .filter(Resume.id == resume_id)
+        .filter(
+            Resume.id == resume_id,
+            Resume.user_id == user.id
+        )
         .first()
     )
 
     if resume is None:
-
         raise HTTPException(
             status_code=404,
             detail="Resume not found."
         )
 
     # -----------------------------------
-    # Extract PDF Text
+    # Build Absolute PDF Path
     # -----------------------------------
 
-    resume_text = PDFParser.extract_text(
-    resume.filepath
-    )
+    pdf_path = Path("app/uploads") / resume.filepath
 
-    if not resume_text:
+    if not pdf_path.exists():
+        raise HTTPException(
+            status_code=404,
+            detail="Resume file not found."
+        )
+
+    # -----------------------------------
+    # Extract Resume Text
+    # -----------------------------------
+
+    try:
+
+        resume_text = PDFParser.extract_text(
+            str(pdf_path)
+        )
+
+    except Exception as e:
+
+        raise HTTPException(
+            status_code=500,
+            detail=f"PDF parsing failed: {str(e)}"
+        )
+
+    if not resume_text.strip():
 
         raise HTTPException(
             status_code=400,
@@ -60,19 +98,17 @@ def analyze_resume(
     # NLP Analysis
     # -----------------------------------
 
-    extracted_data = resume_nlp_service.analyze_resume(
-    resume_text
+    extracted_data = (
+        resume_nlp_service.analyze_resume(
+            resume_text
+        )
     )
 
     # -----------------------------------
     # ATS Score
     # -----------------------------------
 
-    ats = ATSScorer()
-
-    result = ats.calculate_score(
-        extracted_data
-    )
+    result = ATSService.calculate(resume_text)
 
     # -----------------------------------
     # Save Analysis
@@ -80,12 +116,12 @@ def analyze_resume(
 
     resume.ats_score = result["ats_score"]
 
-    resume.ats_grade = result["grade"]
+    resume.ats_grade = result["ats_grade"]
 
     resume.analysis_result = json.dumps(
-        extracted_data,
-        ensure_ascii=False
-    )
+    result,
+    ensure_ascii=False
+)
 
     db.commit()
 

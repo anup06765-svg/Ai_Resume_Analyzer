@@ -4,6 +4,7 @@ from app.models.user import User
 
 from app.auth.password import hash_password
 
+from app.auth.password import verify_password
 
 # ----------------------------
 # Check Existing Email
@@ -86,3 +87,31 @@ def get_all_users(
 ):
 
     return db.query(User).all()
+
+# ----------------------------
+# Authenticate User
+# ----------------------------
+
+
+
+
+def authenticate_user(
+    db: Session,
+    email: str,
+    password: str
+):
+    """
+    Authenticate user using email and password.
+    Returns User object if credentials are valid.
+    Otherwise returns None.
+    """
+
+    user = get_user_by_email(db, email)
+
+    if not user:
+        return None
+
+    if not verify_password(password, user.password):
+        return None
+
+    return user
