@@ -1,7 +1,6 @@
 import json
 
 from fastapi import APIRouter, Request, Depends
-from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session
 
 from app.database.database import get_db
@@ -20,9 +19,6 @@ def dashboard(
     db: Session = Depends(get_db),
     user=Depends(login_required)
 ):
-
-    if isinstance(user, RedirectResponse):
-        return user
 
     # ------------------------------------
     # Get User Resumes

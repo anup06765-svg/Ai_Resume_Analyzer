@@ -1,0 +1,228 @@
+{% extends "dashboard_base.html" %}
+
+{% block title %}
+ATS Report
+{% endblock %}
+
+{% block content %}
+
+<div class="dashboard">
+
+    <!-- ================= Sidebar ================= -->
+
+    <aside class="sidebar">
+
+        <div class="logo">
+    <a href="/" class="logo-btn">
+        <i class="fa-solid fa-brain"></i>
+        <span>AI Resume</span>
+    </a>
+</div>
+
+        <ul class="menu">
+
+            <li>
+                <a href="/dashboard/"><i class="fa-solid fa-house"></i> Dashboard</a>
+            </li>
+
+            <li>
+                <a href="/resume/upload"><i class="fa-solid fa-upload"></i> Upload Resume</a>
+            </li>
+
+            <li>
+                <a href="/resume/history"><i class="fa-solid fa-folder-open"></i> Resume History</a>
+            </li>
+
+            <li class="active">
+                <a href="/ats"><i class="fa-solid fa-chart-line"></i> ATS Report</a>
+            </li>
+
+            <li>
+                <a href="/job-matching"><i class="fa-solid fa-briefcase"></i> Job Matching</a>
+            </li>
+
+            <li>
+                <a href="/ai-analysis"><i class="fa-solid fa-robot"></i> AI Suggestions</a>
+            </li>
+
+            <li>
+                <a href="/profile"><i class="fa-solid fa-user"></i> Profile</a>
+            </li>
+
+            <li>
+                <a href="/auth/logout"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+            </li>
+
+        </ul>
+
+    </aside>
+
+    <!-- ================= Main Content ================= -->
+
+    <div class="main-content">
+
+        <div class="welcome">
+            <h1>ATS Report</h1>
+            <p>Detailed breakdown of your latest resume's ATS score.</p>
+        </div>
+
+        {% if latest_resume %}
+        <div style="margin-bottom:20px;">
+            <a href="/ats/pdf" class="btn" style="display:inline-block;">
+                <i class="fa-solid fa-download"></i> Download as PDF
+            </a>
+        </div>
+        <div class="dashboard-grid">
+
+            <div class="ats-card" style="overflow: hidden;">
+
+                <h2>ATS Score</h2>
+
+                <div class="gauge">
+
+                    <svg width="220" height="220" viewBox="0 0 220 220">
+
+                        <circle cx="110" cy="110" r="90" class="bg-circle"></circle>
+
+                        <circle
+                            cx="110"
+                            cy="110"
+                            r="90"
+                            class="progress-circle"
+                            stroke-dasharray="565"
+                            stroke-dashoffset="{{ ats_offset }}">
+                        </circle>
+
+                    </svg>
+
+                    <div class="score-text">
+                        <h1>{{ ats_score }}</h1>
+                        <span>/100</span>
+                    </div>
+
+                </div>
+
+                <h3>Grade : {{ ats_grade }}</h3>
+
+            </div>
+
+        </div>
+
+        <!-- ================= Score Breakdown ================= -->
+
+        <div class="analytics-section">
+
+            <h2>Score Breakdown</h2>
+
+            <div class="analytics-grid">
+
+                {% for item in breakdown_items %}
+
+                <div class="analytics-card">
+
+                    <h3><i class="{{ item.icon }}"></i> {{ item.label }}</h3>
+
+                    <h1>{{ item.value }}<span style="font-size: 1rem;">/{{ item.max }}</span></h1>
+
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: {{ item.percent }}%;"></div>
+                    </div>
+
+                </div>
+
+                {% endfor %}
+
+            </div>
+
+        </div>
+        
+        <div class="analytics-section">
+
+            <h2>Skills Analysis</h2>
+
+            <div class="analytics-grid">
+                
+                <div class="analytics-card">
+
+                    <h3>✅ Matched Skills ({{ matched_skills|length }})</h3>
+
+                    <p>
+                        {% if matched_skills %}
+                            {{ matched_skills|join(", ") }}
+                        {% else %}
+                            No matched skills found.
+                        {% endif %}
+                    </p>
+
+                </div>
+                
+
+                <div class="analytics-card">
+
+                    <h3>❌ Missing Skills ({{ missing_skills|length }})</h3>
+
+                    <p>
+                        {% if missing_skills %}
+                            {{ missing_skills|join(", ") }}
+                        {% else %}
+                            No missing skills.
+                        {% endif %}
+                    </p>
+
+                </div>
+                
+            </div>
+
+        </div>
+        
+        <div class="analytics-section">
+
+            <h2>Suggestions to Improve</h2>
+
+            <div class="tips-grid">
+
+                {% if suggestions %}
+
+                    {% for tip in suggestions %}
+
+                    <div class="tip-card warning">
+                        <p>{{ tip }}</p>
+                    </div>
+
+                    {% endfor %}
+
+                {% else %}
+
+                    <div class="tip-card success">
+                        <p>🎉 No suggestions — your resume looks good!</p>
+                    </div>
+
+                {% endif %}
+
+            </div>
+
+        </div>
+
+        {% else %}
+
+        <div class="resume-details">
+
+            <div class="detail-box">
+
+                <div class="empty-state">
+                    <h3>No Resume Uploaded Yet</h3>
+                    <p>Upload a resume to see your ATS report.</p>
+                    <a href="/resume/upload" class="btn">Upload Resume</a>
+                </div>
+
+            </div>
+
+        </div>
+
+        {% endif %}
+
+    </div>
+
+</div>
+
+{% endblock %}

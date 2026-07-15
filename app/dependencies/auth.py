@@ -1,5 +1,4 @@
-from fastapi import Request, Depends
-from fastapi.responses import RedirectResponse
+from fastapi import Request, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.database.database import get_db
@@ -10,23 +9,18 @@ def get_current_user(
     request: Request,
     db: Session = Depends(get_db)
 ):
-    print("=" * 50)
-    print("SESSION:", dict(request.session))
-    print("=" * 50)
+    """
+    Checks if a user is logged in (via session).
+    If not logged in, stops the request immediately and redirects to login.
+    If logged in, returns the User object.
+    """
 
-    user_id = request.session.get("user_id")
-
-    
-def get_current_user(
-    request: Request,
-    db: Session = Depends(get_db)
-):
     user_id = request.session.get("user_id")
 
     if not user_id:
-        return RedirectResponse(
-            url="/auth/login",
-            status_code=302
+        raise HTTPException(
+            status_code=status.HTTP_303_SEE_OTHER,
+            headers={"Location": "/auth/login"}
         )
 
     user = (
@@ -38,9 +32,9 @@ def get_current_user(
     if not user:
         request.session.clear()
 
-        return RedirectResponse(
-            url="/auth/login",
-            status_code=302
+        raise HTTPException(
+            status_code=status.HTTP_303_SEE_OTHER,
+            headers={"Location": "/auth/login"}
         )
 
     return user

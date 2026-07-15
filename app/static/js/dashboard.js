@@ -134,4 +134,57 @@ document.addEventListener("DOMContentLoaded", () => {
 
     }
 
+/*=========================
+        MOBILE SIDEBAR TOGGLE
+    =========================*/
+
+    const sidebar = document.querySelector(".sidebar");
+    const sidebarToggle = document.getElementById("sidebarToggle");
+    const sidebarOverlay = document.getElementById("sidebarOverlay");
+
+    function openSidebar() {
+        if (sidebar) sidebar.classList.add("active");
+        if (sidebarOverlay) sidebarOverlay.classList.add("active");
+    }
+
+    function closeSidebar() {
+        if (sidebar) sidebar.classList.remove("active");
+        if (sidebarOverlay) sidebarOverlay.classList.remove("active");
+    }
+
+    if (sidebarToggle) {
+
+        sidebarToggle.addEventListener("click", () => {
+
+            if (sidebar && sidebar.classList.contains("active")) {
+                closeSidebar();
+            } else {
+                openSidebar();
+            }
+
+        });
+
+    }
+
+    if (sidebarOverlay) {
+        sidebarOverlay.addEventListener("click", closeSidebar);
+    }
+
+    // Close sidebar automatically when a menu link is tapped (mobile UX)
+    if (sidebar) {
+
+        sidebar.querySelectorAll(".menu li a").forEach(link => {
+
+            link.addEventListener("click", () => {
+
+                if (window.innerWidth <= 992) {
+                    closeSidebar();
+                }
+
+            });
+
+        });
+
+    }
+
 });

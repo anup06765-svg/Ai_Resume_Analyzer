@@ -1,0 +1,268 @@
+{% extends "dashboard_base.html" %}
+
+{% block title %}
+Job Matching
+{% endblock %}
+
+{% block content %}
+
+<div class="dashboard">
+
+    <!-- ================= Sidebar ================= -->
+
+    <aside class="sidebar">
+
+        <div class="logo">
+    <a href="/" class="logo-btn">
+        <i class="fa-solid fa-brain"></i>
+        <span>AI Resume</span>
+    </a>
+</div>
+
+        <ul class="menu">
+
+            <li>
+                <a href="/dashboard/"><i class="fa-solid fa-house"></i> Dashboard</a>
+            </li>
+
+            <li>
+                <a href="/resume/upload"><i class="fa-solid fa-upload"></i> Upload Resume</a>
+            </li>
+
+            <li>
+                <a href="/resume/history"><i class="fa-solid fa-folder-open"></i> Resume History</a>
+            </li>
+
+            <li>
+                <a href="/ats"><i class="fa-solid fa-chart-line"></i> ATS Report</a>
+            </li>
+
+            <li class="active">
+                <a href="/job-matching"><i class="fa-solid fa-briefcase"></i> Job Matching</a>
+            </li>
+
+            <li>
+                <a href="/ai-analysis"><i class="fa-solid fa-robot"></i> AI Suggestions</a>
+            </li>
+
+            <li>
+                <a href="/profile"><i class="fa-solid fa-user"></i> Profile</a>
+            </li>
+
+            <li>
+                <a href="/auth/logout"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+            </li>
+
+        </ul>
+
+    </aside>
+
+    <!-- ================= Main Content ================= -->
+
+    <div class="main-content">
+
+        <div class="welcome">
+            <h1>Job Matching</h1>
+            <p>Paste a job description to see how well your resume matches.</p>
+        </div>
+
+        {% if not resumes %}
+
+        <div class="resume-details">
+
+            <div class="detail-box">
+
+                <div class="empty-state">
+                    <h3>No Resume Uploaded Yet</h3>
+                    <p>Upload a resume first to use Job Matching.</p>
+                    <a href="/resume/upload" class="btn">Upload Resume</a>
+                </div>
+
+            </div>
+
+        </div>
+
+        {% else %}
+
+        <!-- ================= Form ================= -->
+
+        <div class="resume-details">
+
+            <div class="detail-box">
+
+                <form method="post" action="/job-matching">
+
+                    <label for="resume_id"><strong>Select Resume</strong></label><br>
+
+                    <select
+                        name="resume_id"
+                        id="resume_id"
+                        required
+                        style="width: 100%; padding: 10px; border-radius: 8px; margin-top: 6px;"
+                    >
+
+                        {% for resume in resumes %}
+
+                        <option
+                            value="{{ resume.id }}"
+                            {% if selected_resume_id == resume.id %}selected{% endif %}
+                        >
+                            {{ resume.filename }}
+                        </option>
+
+                        {% endfor %}
+
+                    </select>
+
+                    <br><br>
+
+                    <label for="jd_text"><strong>Job Description</strong></label><br>
+
+                    <textarea
+                        name="jd_text"
+                        id="jd_text"
+                        rows="8"
+                        style="width: 100%; padding: 10px; border-radius: 8px; margin-top: 6px;"
+                        placeholder="Paste the job description here... e.g. We are looking for a Python developer skilled in Django, FastAPI, SQL, Docker and Git."
+                        required
+                    >{{ jd_text }}</textarea>
+
+                    <br><br>
+
+                    <button type="submit" class="btn">Analyze Match</button>
+
+                </form>
+
+                {% if error %}
+                <p style="color: #ff6b6b; margin-top: 10px;">⚠ {{ error }}</p>
+                {% endif %}
+
+            </div>
+
+        </div>
+
+        {% endif %}
+
+
+        <br>
+        <!-- ================= Result ================= -->
+        <br>
+        {% if result %}
+
+        <div class="dashboard-grid">
+
+            <div class="ats-card">
+
+                <h2>Job Match Score</h2>
+
+                <div class="gauge">
+
+                    <svg width="220" height="220" viewBox="0 0 220 220">
+
+                        <circle cx="110" cy="110" r="90" class="bg-circle"></circle>
+
+                        <circle
+                            cx="110"
+                            cy="110"
+                            r="90"
+                            class="progress-circle"
+                            stroke-dasharray="565"
+                            stroke-dashoffset="{{ match_offset }}">
+                        </circle>
+
+                    </svg>
+
+                    <div class="score-text">
+                        <h1>{{ result.matching_score }}</h1>
+                        <span>%</span>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="analytics-section">
+
+            <h2>Skills Comparison</h2>
+
+            <div class="analytics-grid">
+
+                <div class="analytics-card">
+
+                    <h3>✅ Matched Skills ({{ result.matched_skills|length }})</h3>
+
+                    <div>
+                        {% if result.matched_skills %}
+                            {% for skill in result.matched_skills %}
+                            <span style="display:inline-block; background:#1f9d55; color:white; padding:4px 10px; border-radius:12px; margin:3px; font-size:0.85rem;">{{ skill }}</span>
+                            {% endfor %}
+                        {% else %}
+                            <p>No matched skills found.</p>
+                        {% endif %}
+                    </div>
+
+                </div>
+
+                <div class="analytics-card">
+
+                    <h3>❌ Missing Skills ({{ result.missing_skills|length }})</h3>
+
+                    <div>
+                        {% if result.missing_skills %}
+                            {% for skill in result.missing_skills %}
+                            <span style="display:inline-block; background:#d64545; color:white; padding:4px 10px; border-radius:12px; margin:3px; font-size:0.85rem;">{{ skill }}</span>
+                            {% endfor %}
+                        {% else %}
+                            <p>None — great match!</p>
+                        {% endif %}
+                    </div>
+
+                </div>
+
+                <div class="analytics-card">
+
+                    <h3>➕ Extra Skills ({{ result.extra_skills|length }})</h3>
+
+                    <div>
+                        {% if result.extra_skills %}
+                            {% for skill in result.extra_skills %}
+                            <span style="display:inline-block; background:#3b5bdb; color:white; padding:4px 10px; border-radius:12px; margin:3px; font-size:0.85rem;">{{ skill }}</span>
+                            {% endfor %}
+                        {% else %}
+                            <p>None</p>
+                        {% endif %}
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="analytics-section">
+
+            <h2>AI Suggestions</h2>
+
+            <div class="tips-grid">
+
+                {% for tip in result.ai_suggestions %}
+
+                <div class="tip-card info">
+                    <p>{{ tip }}</p>
+                </div>
+
+                {% endfor %}
+
+            </div>
+
+        </div>
+
+        {% endif %}
+
+    </div>
+
+</div>
+
+{% endblock %}

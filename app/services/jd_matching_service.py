@@ -1,7 +1,7 @@
 import re
 from typing import Dict, List, Set
 
-from app.services.nlp_service import ResumeNLPService
+from app.services.nlp_service import NLPService
 
 
 class JDMatchingService:
@@ -10,7 +10,7 @@ class JDMatchingService:
     """
 
     def __init__(self):
-        self.resume_nlp = ResumeNLPService()
+        self.resume_nlp = NLPService()
         self.available_skills = {
             skill.lower()
             for skill in self.resume_nlp.SKILLS

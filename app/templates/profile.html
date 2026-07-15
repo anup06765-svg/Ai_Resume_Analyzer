@@ -1,0 +1,152 @@
+{% extends "dashboard_base.html" %}
+
+{% block title %}
+Profile
+{% endblock %}
+
+{% block content %}
+
+<div class="dashboard">
+
+    <!-- ================= Sidebar ================= -->
+
+    <aside class="sidebar">
+
+        <div class="logo">
+    <a href="/" class="logo-btn">
+        <i class="fa-solid fa-brain"></i>
+        <span>AI Resume</span>
+    </a>
+</div>
+
+        <ul class="menu">
+
+            <li>
+                <a href="/dashboard/"><i class="fa-solid fa-house"></i> Dashboard</a>
+            </li>
+
+            <li>
+                <a href="/resume/upload"><i class="fa-solid fa-upload"></i> Upload Resume</a>
+            </li>
+
+            <li>
+                <a href="/resume/history"><i class="fa-solid fa-folder-open"></i> Resume History</a>
+            </li>
+
+            <li>
+                <a href="/ats"><i class="fa-solid fa-chart-line"></i> ATS Report</a>
+            </li>
+
+            <li>
+                <a href="/job-matching"><i class="fa-solid fa-briefcase"></i> Job Matching</a>
+            </li>
+
+            <li>
+                <a href="/ai-analysis"><i class="fa-solid fa-robot"></i> AI Suggestions</a>
+            </li>
+
+            <li class="active">
+                <a href="/profile"><i class="fa-solid fa-user"></i> Profile</a>
+            </li>
+
+            <li>
+                <a href="/auth/logout"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+            </li>
+
+        </ul>
+
+    </aside>
+
+    <!-- ================= Main Content ================= -->
+
+    <div class="main-content">
+
+        <div class="welcome">
+            <h1>My Profile</h1>
+            <p>View your account details and resume statistics.</p>
+        </div>
+
+        <!-- ================= Profile Card ================= -->
+
+        <div class="resume-details">
+
+            <div class="detail-box" style="text-align:center;">
+
+                <div class="avatar" style="width:80px; height:80px; font-size:32px; margin:0 auto 15px auto;">
+                    {{ user.full_name[0] }}
+                </div>
+
+                <h2>{{ user.full_name }}</h2>
+
+                <p style="color:#94a3b8;">{{ user.email }}</p>
+
+            </div>
+
+        </div>
+
+        <!-- ================= Stats ================= -->
+
+        <div class="analytics-section">
+
+            <h2>Account Statistics</h2>
+
+            <div class="analytics-grid">
+
+                <div class="analytics-card">
+                    <h3>Total Resumes Uploaded</h3>
+                    <h1>{{ total_resumes }}</h1>
+                </div>
+
+                <div class="analytics-card">
+                    <h3>Average ATS Score</h3>
+                    <h1>{{ average_ats_score }}</h1>
+                </div>
+
+                <div class="analytics-card">
+                    <h3>Latest Resume</h3>
+                    <p>
+                        {% if latest_resume %}
+                            {{ latest_resume.filename }}
+                        {% else %}
+                            No resume uploaded yet
+                        {% endif %}
+                    </p>
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- ================= Quick Actions ================= -->
+
+        <div class="analytics-section">
+
+            <h2>Quick Actions</h2>
+
+            <div class="analytics-grid">
+
+    <a href="/resume/upload" class="analytics-card">
+        <h3>📄 Upload New Resume</h3>
+    </a>
+
+    <a href="/resume/history" class="analytics-card">
+        <h3>📁 View Resume History</h3>
+    </a>
+
+    <a href="/change-password" class="analytics-card">
+        <h3>🔒 Change Password</h3>
+    </a>
+
+    <a href="/auth/logout" class="analytics-card">
+        <h3>🚪 Logout</h3>
+    </a>
+
+</div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

@@ -8,9 +8,10 @@ from app.auth.password import hash_password, verify_password
 from app.database.database import get_db
 from app.models.user import User
 
-templates = Jinja2Templates(
-    directory="app/templates"
-)
+from slowapi import Limiter
+from slowapi.util import get_remote_address
+
+limiter = Limiter(key_func=get_remote_address)
 
 router = APIRouter(
     prefix="/auth",
@@ -120,6 +121,7 @@ def login_page(request: Request):
 # ============================
 
 @router.post("/login")
+@limiter.limit("5/minute")
 def login_user(
 
     request: Request,
@@ -155,8 +157,6 @@ def login_user(
     request.session["user_id"] = user.id
 
     request.session["user_name"] = user.full_name
-
-    print("LOGIN SESSION:", dict(request.session))
 
     return RedirectResponse(
 

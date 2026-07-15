@@ -1,0 +1,121 @@
+{% extends "dashboard_base.html" %}
+
+{% block title %}
+Resume History
+{% endblock %}
+
+{% block content %}
+
+<div class="dashboard">
+
+    <!-- ================= Sidebar ================= -->
+
+    <aside class="sidebar">
+
+        <div class="logo">
+    <a href="/" class="logo-btn">
+        <i class="fa-solid fa-brain"></i>
+        <span>AI Resume</span>
+    </a>
+</div>
+
+        <ul class="menu">
+
+            <li>
+                <a href="/dashboard/"><i class="fa-solid fa-house"></i> Dashboard</a>
+            </li>
+
+            <li>
+                <a href="/resume/upload"><i class="fa-solid fa-upload"></i> Upload Resume</a>
+            </li>
+
+            <li class="active">
+                <a href="/resume/history"><i class="fa-solid fa-folder-open"></i> Resume History</a>
+            </li>
+
+            <li>
+                <a href="/ats"><i class="fa-solid fa-chart-line"></i> ATS Report</a>
+            </li>
+
+            <li>
+                <a href="/job-matching"><i class="fa-solid fa-briefcase"></i> Job Matching</a>
+            </li>
+
+            <li>
+                <a href="/ai-analysis"><i class="fa-solid fa-robot"></i> AI Suggestions</a>
+            </li>
+
+            <li>
+                <a href="/profile"><i class="fa-solid fa-user"></i> Profile</a>
+            </li>
+
+            <li>
+                <a href="/auth/logout"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+            </li>
+
+        </ul>
+
+    </aside>
+
+    <!-- ================= Main Content ================= -->
+
+    <div class="main-content">
+
+        <div class="welcome">
+            <h1>Resume History</h1>
+            <p>View and manage all resumes you have uploaded.</p>
+        </div>
+
+        {% if resumes %}
+
+        <div class="analytics-section">
+
+            <div class="analytics-grid">
+
+                {% for resume in resumes %}
+
+                <div class="analytics-card">
+
+                    <h3><i class="fa-solid fa-file-pdf"></i> {{ resume.filename }}</h3>
+
+                    <h1>{{ resume.ats_score }}/100</h1>
+
+                    <p>Grade: <strong>{{ resume.ats_grade }}</strong></p>
+
+                    <a href="/resume/view/{{ resume.id }}" class="btn" target="_blank">View Resume</a>
+
+                </div>
+
+                {% endfor %}
+
+            </div>
+
+        </div>
+
+        {% else %}
+
+        <div class="resume-details">
+
+            <div class="detail-box">
+
+                <div class="empty-state">
+
+                    <h3>No Resumes Uploaded Yet</h3>
+
+                    <p>Upload your first resume to see it here.</p>
+
+                    <a href="/resume/upload" class="btn">Upload Resume</a>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        {% endif %}
+
+    </div>
+
+</div>
+
+{% endblock %}

@@ -25,56 +25,160 @@
 
 </section>
 
-<section class="features">
+<section class="features" id="features">
 
     <div class="feature-card">
-
+        <div class="feature-icon"><i class="fa-solid fa-chart-line"></i></div>
         <h2>ATS Score</h2>
-
         <p>
-
-            Calculate Resume ATS Score instantly.
-
+            Calculate Resume ATS Score instantly using AI-powered
+            keyword and formatting checks.
         </p>
-
     </div>
 
     <div class="feature-card">
-
+        <div class="feature-icon"><i class="fa-solid fa-robot"></i></div>
         <h2>AI Suggestions</h2>
-
         <p>
-
-            Improve resume using Artificial Intelligence.
-
+            Get personalized, actionable tips to improve your resume
+            and increase your chances of getting shortlisted.
         </p>
-
     </div>
 
     <div class="feature-card">
-
+        <div class="feature-icon"><i class="fa-solid fa-magnifying-glass"></i></div>
         <h2>Skill Detection</h2>
-
         <p>
-
-            Detect Technical and Soft Skills.
-
+            Automatically detect technical and soft skills from your
+            resume with high accuracy.
         </p>
+    </div>
+
+    <div class="feature-card">
+        <div class="feature-icon"><i class="fa-solid fa-briefcase"></i></div>
+        <h2>Job Matching</h2>
+        <p>
+            Paste any job description and instantly see how well your
+            resume matches the required skills.
+        </p>
+    </div>
+
+    <div class="feature-card">
+        <div class="feature-icon"><i class="fa-solid fa-folder-open"></i></div>
+        <h2>Resume History</h2>
+        <p>
+            Keep track of every resume you've uploaded and revisit
+            past analyses anytime.
+        </p>
+    </div>
+
+    <div class="feature-card">
+        <div class="feature-icon"><i class="fa-solid fa-shield-halved"></i></div>
+        <h2>Secure &amp; Private</h2>
+        <p>
+            Your resumes are stored securely and only accessible by
+            you — never shared with anyone else.
+        </p>
+    </div>
+
+</section>
+
+<section class="about" id="about">
+
+    <span class="section-tag">WHY CHOOSE US</span>
+
+    <h2>Built To Help You Get Hired Faster</h2>
+
+    <p>
+        Our AI Resume Analyzer helps students and professionals improve
+        their resumes with smart AI recommendations and ATS optimization.
+        Whether you're applying for your first job or switching careers,
+        we help you stand out to recruiters and pass automated screening
+        systems with confidence.
+    </p>
+
+    <div class="stats-grid">
+
+        <div class="stat-card">
+            <div class="stat-icon"><i class="fa-solid fa-file-circle-check"></i></div>
+            <h3>10K+</h3>
+            <p>Resumes Analyzed</p>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon"><i class="fa-solid fa-bullseye"></i></div>
+            <h3>95%</h3>
+            <p>Accuracy in Skill Detection</p>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon"><i class="fa-solid fa-layer-group"></i></div>
+            <h3>50+</h3>
+            <p>Skills Tracked</p>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon"><i class="fa-solid fa-clock"></i></div>
+            <h3>24/7</h3>
+            <p>Available Anytime</p>
+        </div>
 
     </div>
 
 </section>
 
-<section class="about">
+<section class="contact-section" id="contact-info">
 
-<h2>Why Choose Us?</h2>
+    <span class="section-tag">GET IN TOUCH</span>
 
-<p>
+    <h2>We'd Love To Hear From You</h2>
 
-Our AI Resume Analyzer helps students and professionals improve
-their resumes with smart AI recommendations and ATS optimization.
+    <p>Have questions or feedback? Send us a message below.</p>
 
-</p>
+    {% if contact_success %}
+    <div class="alert alert-success" style="max-width:600px; margin:0 auto 30px auto;">
+        ✅ Thank you! Your message has been received.
+    </div>
+    {% endif %}
+
+    <div class="contact-wrapper">
+
+        <div class="contact-info-cards">
+
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fa-solid fa-envelope"></i></div>
+                <h2>Email</h2>
+                <p>support@airesumeanalyzer.com</p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fa-solid fa-comments"></i></div>
+                <h2>Support</h2>
+                <p>Available Monday to Saturday, 9 AM – 7 PM</p>
+            </div>
+
+        </div>
+
+        <div class="contact-form-box">
+
+            <form method="post" action="/contact">
+
+                <label for="name">Name</label>
+                <input type="text" name="name" id="name" required>
+
+                <label for="email">Email</label>
+                <input type="email" name="email" id="email" required>
+
+                <label for="message">Message</label>
+                <textarea name="message" id="message" rows="5" required></textarea>
+
+                <button type="submit" class="btn-upload">Send Message</button>
+
+            </form>
+
+        </div>
+
+    </div>
 
 </section>
 

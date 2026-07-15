@@ -3,9 +3,10 @@ from fastapi import (
     Request,
     Depends,
     UploadFile,
-    File
+    File,
+    HTTPException
 )
-from fastapi.responses import RedirectResponse
+from fastapi.responses import RedirectResponse, FileResponse
 from starlette import status
 
 from fastapi.templating import Jinja2Templates
@@ -26,7 +27,6 @@ router = APIRouter(
 )
 
 
-
 # ===================================================
 # Upload Resume Page
 # ===================================================
@@ -37,10 +37,6 @@ def upload_page(
     user=Depends(login_required)
 ):
     templates = request.app.state.templates
-
-
-    if hasattr(user, "status_code"):
-        return user
 
     return templates.TemplateResponse(
         "upload_resume.html",
@@ -65,13 +61,6 @@ async def upload_resume(
     user=Depends(login_required)
 ):
     templates = request.app.state.templates
-
-    # -------------------------
-    # Session Check
-    # -------------------------
-
-    if hasattr(user, "status_code"):
-        return user
 
     # -------------------------
     # Validate PDF
@@ -196,6 +185,84 @@ async def upload_resume(
     # -------------------------
 
     return RedirectResponse(
-    url="/dashboard/",
-    status_code=status.HTTP_303_SEE_OTHER
-)
+        url="/dashboard/",
+        status_code=status.HTTP_303_SEE_OTHER
+    )
+
+
+# ===================================================
+# View / Download Resume (Secure)
+# ===================================================
+
+@router.get("/view/{resume_id}")
+def view_resume(
+    resume_id: int,
+    db: Session = Depends(get_db),
+    user=Depends(login_required)
+):
+    """
+    Securely serve a resume PDF.
+    Only the owner of the resume can view/download it.
+    """
+
+    resume = (
+        db.query(Resume)
+        .filter(
+            Resume.id == resume_id,
+            Resume.user_id == user.id
+        )
+        .first()
+    )
+
+    if not resume:
+        raise HTTPException(
+            status_code=404,
+            detail="Resume not found."
+        )
+
+    file_path = FileService.get_file_path(resume.filepath)
+
+    if not file_path.exists():
+        raise HTTPException(
+            status_code=404,
+            detail="File not found on server."
+        )
+
+    return FileResponse(
+        path=file_path,
+        media_type="application/pdf",
+        filename=resume.filename
+    )
+
+
+# ===================================================
+# Resume History Page
+# ===================================================
+
+@router.get("/history")
+def resume_history(
+    request: Request,
+    db: Session = Depends(get_db),
+    user=Depends(login_required)
+):
+    """
+    Shows a list of all resumes uploaded by the logged-in user.
+    """
+
+    resumes = (
+        db.query(Resume)
+        .filter(Resume.user_id == user.id)
+        .order_by(Resume.id.desc())
+        .all()
+    )
+
+    templates = request.app.state.templates
+
+    return templates.TemplateResponse(
+        "resume_history.html",
+        {
+            "request": request,
+            "user": user,
+            "resumes": resumes
+        }
+    )
