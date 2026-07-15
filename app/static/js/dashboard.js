@@ -197,4 +197,12 @@ if (hamburgerBtn && navMenu) {
         const isOpen = navMenu.classList.toggle('open');
         hamburgerBtn.setAttribute('aria-expanded', isOpen);
     });
+
+    // Jab bhi navMenu ke andar koi link click ho, menu close ho jaye
+    navMenu.querySelectorAll('a').forEach(link => {
+        link.addEventListener('click', () => {
+            navMenu.classList.remove('open');
+            hamburgerBtn.setAttribute('aria-expanded', false);
+        });
+    });
 }

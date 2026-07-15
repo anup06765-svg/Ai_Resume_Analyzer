@@ -38,7 +38,6 @@ body{
     padding:18px 8%;
 
     background:#324877;
-;
 
     position:sticky;
 
@@ -361,7 +360,6 @@ nav a:hover{
 footer{
 
     background:#1d4ed8;
-;
 
     color:white;
 
@@ -392,26 +390,16 @@ footer{
 }
 
 /* ==========================
-   Responsive
+   Responsive (Navbar)
 ========================== */
 
 @media(max-width:768px){
 
 .navbar{
 
-    flex-direction:column;
+    flex-wrap:nowrap;
 
-    gap:15px;
-
-    padding:20px;
-
-}
-
-nav{
-
-    flex-wrap:wrap;
-
-    justify-content:center;
+    padding:15px 20px;
 
 }
 
@@ -1002,6 +990,10 @@ input[type="file"]::file-selector-button:hover {
 }
 
 
+/* ==========================
+   Mobile Nav (Hamburger)
+========================== */
+
 .hamburger {
     display: none;
     flex-direction: column;
@@ -1010,19 +1002,21 @@ input[type="file"]::file-selector-button:hover {
     border: none;
     cursor: pointer;
     padding: 6px;
+    z-index: 1100;
 }
 
 .hamburger span {
     width: 26px;
     height: 3px;
-    background: #fff;   /* apne navbar text color se match karein */
+    background: #fff;
     border-radius: 2px;
     display: block;
 }
 
 @media (max-width: 768px) {
+
     .navbar {
-        flex-wrap: wrap;
+        flex-wrap: nowrap;
     }
 
     .hamburger {
@@ -1031,13 +1025,30 @@ input[type="file"]::file-selector-button:hover {
 
     nav#navMenu {
         display: none;
-        flex-direction: column;
+        position: absolute;
+        top: 100%;
+        left: 0;
         width: 100%;
-        gap: 12px;
-        margin-top: 12px;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0;
+        background: #324877;
+        padding: 10px 8%;
+        box-shadow: 0 8px 15px rgba(0,0,0,.2);
     }
 
     nav#navMenu.open {
         display: flex;
+    }
+
+    nav#navMenu a {
+        width: 100%;
+        padding: 12px 0;
+        border-bottom: 1px solid rgba(255,255,255,.15);
+    }
+
+    nav#navMenu .nav-btn {
+        margin: 12px 0;
+        text-align: center;
     }
 }
