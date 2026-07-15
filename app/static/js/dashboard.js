@@ -188,3 +188,13 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
 });
+
+const hamburgerBtn = document.getElementById('hamburgerBtn');
+const navMenu = document.getElementById('navMenu');
+
+if (hamburgerBtn && navMenu) {
+    hamburgerBtn.addEventListener('click', () => {
+        const isOpen = navMenu.classList.toggle('open');
+        hamburgerBtn.setAttribute('aria-expanded', isOpen);
+    });
+}

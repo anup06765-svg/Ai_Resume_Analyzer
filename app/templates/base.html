@@ -10,6 +10,7 @@
     <title>
         {% block title %}
         AI Resume Analyzer
+        
         {% endblock %}
     </title>
 
@@ -32,45 +33,30 @@
 <header class="navbar">
 
     <div class="logo">
-
         <a href="/">AI Resume Analyzer</a>
-
     </div>
 
-    <nav>
+    <!-- Yeh naya button add karein -->
+    <button class="hamburger" id="hamburgerBtn" aria-label="Toggle menu" aria-expanded="false">
+        <span></span>
+        <span></span>
+        <span></span>
+    </button>
 
+    <nav id="navMenu">
         <a href="/">Home</a>
-
         <a href="#about">About</a>
-
         <a href="#features">Features</a>
-
         <a href="#contact-info">Contact</a>
 
         {% if request.session.get("user_id") %}
-
             <a href="/dashboard">Dashboard</a>
-
-            <a href="/auth/logout" class="nav-btn logout">
-
-                Logout
-
-            </a>
-
+            <a href="/auth/logout" class="nav-btn logout">Logout</a>
         {% else %}
-
             <a href="/auth/login">Login</a>
-
-            <a href="/auth/register" class="nav-btn">
-
-                Register
-
-            </a>
-
+            <a href="/auth/register" class="nav-btn">Register</a>
         {% endif %}
-
     </nav>
-
 
 </header>
 {% endif %}

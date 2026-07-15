@@ -1000,3 +1000,44 @@ input[type="file"]::file-selector-button:hover {
     }
 
 }
+
+
+.hamburger {
+    display: none;
+    flex-direction: column;
+    gap: 5px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 6px;
+}
+
+.hamburger span {
+    width: 26px;
+    height: 3px;
+    background: #fff;   /* apne navbar text color se match karein */
+    border-radius: 2px;
+    display: block;
+}
+
+@media (max-width: 768px) {
+    .navbar {
+        flex-wrap: wrap;
+    }
+
+    .hamburger {
+        display: flex;
+    }
+
+    nav#navMenu {
+        display: none;
+        flex-direction: column;
+        width: 100%;
+        gap: 12px;
+        margin-top: 12px;
+    }
+
+    nav#navMenu.open {
+        display: flex;
+    }
+}
