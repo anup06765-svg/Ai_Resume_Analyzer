@@ -30,10 +30,19 @@ from app.crud.user_crud import (
 # Register Page
 # ============================
 
+
 @router.get("/register")
 def register_page(request: Request):
+    # Agar user already logged in hai, register page mat dikhao,
+    # seedha dashboard bhej do (back button issue fix)
+    if request.session.get("user_id"):
+        return RedirectResponse(
+            url="/dashboard/",
+            status_code=status.HTTP_303_SEE_OTHER
+        )
+
     templates = request.app.state.templates
-    return templates.TemplateResponse(
+    response = templates.TemplateResponse(
         "register.html",
         {
             "request": request,
@@ -41,6 +50,13 @@ def register_page(request: Request):
             "success": None
         }
     )
+
+    # Browser ko is page ko cache/bfcache me store karne se roko
+    response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+    response.headers["Pragma"] = "no-cache"
+    response.headers["Expires"] = "0"
+
+    return response
 
 
 # ============================
@@ -99,11 +115,20 @@ def register_user(
 # Login Page
 # ============================
 
+
 @router.get("/login")
 def login_page(request: Request):
+    # Agar user already logged in hai, login page mat dikhao,
+    # seedha dashboard bhej do (back button issue fix)
+    if request.session.get("user_id"):
+        return RedirectResponse(
+            url="/dashboard/",
+            status_code=status.HTTP_303_SEE_OTHER
+        )
+
     templates = request.app.state.templates
 
-    return templates.TemplateResponse(
+    response = templates.TemplateResponse(
 
         "login.html",
 
@@ -114,6 +139,14 @@ def login_page(request: Request):
         }
 
     )
+
+    # Browser ko is page ko cache/bfcache me store karne se roko
+    response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+    response.headers["Pragma"] = "no-cache"
+    response.headers["Expires"] = "0"
+
+    return response
+
 
 
 # ============================

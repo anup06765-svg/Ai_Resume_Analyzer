@@ -110,7 +110,7 @@ def dashboard(
     # Render Dashboard
     # ------------------------------------
 
-    return request.app.state.templates.TemplateResponse(
+    response = request.app.state.templates.TemplateResponse(
 
         "dashboard.html",
 
@@ -143,3 +143,11 @@ def dashboard(
         }
 
     )
+    
+    # Browser ko dashboard page cache/bfcache me store karne se roko
+    # (taaki logout ke baad back button se purana dashboard na dikhe)
+    response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+    response.headers["Pragma"] = "no-cache"
+    response.headers["Expires"] = "0"
+
+    return response
