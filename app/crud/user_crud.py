@@ -32,11 +32,16 @@ def create_user(
 
         email: str,
 
-        password: str
+        password: str,
+
+        role: str = "candidate"
 
 ):
 
     hashed_password = hash_password(password)
+
+    if role not in ("candidate", "hr"):
+        role = "candidate"
 
     new_user = User(
 
@@ -44,7 +49,9 @@ def create_user(
 
         email=email,
 
-        password=hashed_password
+        password=hashed_password,
+
+        role=role
 
     )
 

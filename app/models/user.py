@@ -17,11 +17,23 @@ class User(Base):
     password = Column(String(255), nullable=False)
 
     # -----------------------------
+    # Role: "candidate" (normal user) ya "hr" (recruiter)
+    # -----------------------------
+
+    role = Column(String(20), nullable=False, default="candidate")
+
+    # -----------------------------
     # Relationships
     # -----------------------------
 
     resumes = relationship(
         "Resume",
         back_populates="user",
+        cascade="all, delete-orphan"
+    )
+
+    hr_profiles = relationship(
+        "HRProfile",
+        back_populates="hr",
         cascade="all, delete-orphan"
     )

@@ -1,0 +1,252 @@
+{% extends "dashboard_base.html" %}
+
+{% block title %}
+Create Job Profile
+{% endblock %}
+
+{% block content %}
+
+<div class="dashboard">
+
+    <aside class="sidebar">
+
+        {% set active_page = 'create' %}
+        {% include "partials/hr_sidebar.html" %}
+
+    </aside>
+
+    <div class="main-content">
+
+        <div class="welcome">
+            <h1>Create Job Profile</h1>
+            <p>Create a job profile and bulk upload candidate resumes for screening.</p>
+        </div>
+
+        <div class="detail-box" style="max-width:650px;">
+
+            <p class="form-card-heading">New Job Profile Details</p>
+
+            {% if error %}
+            <div class="error-box">{{ error }}</div>
+            {% endif %}
+
+            <form action="/hr/profile/create" method="POST" onsubmit="return validateTitleBeforeSubmit();">
+                <div class="input-group">
+    <label for="title">
+        <i class="fas fa-briefcase"></i> Profile / Job Title
+    </label>
+
+    <select id="titleSelect" onchange="handleTitleChange()" required>
+        <option value="" selected disabled>Select a Job Profile</option>
+
+
+        <optgroup label="💻 Software Development">
+            <option>Software Engineer</option>
+            <option>Full Stack Developer</option>
+            <option>Frontend Developer</option>
+            <option>Backend Developer</option>
+            <option>Python Developer</option>
+            <option>Java Developer</option>
+            <option>C++ Developer</option>
+            <option>PHP Developer</option>
+            <option>.NET Developer</option>
+            <option>Node.js Developer</option>
+            <option>React Developer</option>
+            <option>Angular Developer</option>
+            <option>Flutter Developer</option>
+            <option>Android Developer</option>
+            <option>iOS Developer</option>
+            <option>Game Developer</option>
+        </optgroup>
+
+        <optgroup label="🤖 AI / Data Science">
+            <option>Machine Learning Engineer</option>
+            <option>AI Engineer</option>
+            <option>Data Scientist</option>
+            <option>Data Analyst</option>
+            <option>Business Intelligence Analyst</option>
+            <option>NLP Engineer</option>
+            <option>Computer Vision Engineer</option>
+            <option>Prompt Engineer</option>
+        </optgroup>
+
+        <optgroup label="☁ Cloud & DevOps">
+            <option>DevOps Engineer</option>
+            <option>Cloud Engineer</option>
+            <option>AWS Engineer</option>
+            <option>Azure Engineer</option>
+            <option>Google Cloud Engineer</option>
+            <option>Site Reliability Engineer (SRE)</option>
+        </optgroup>
+
+        <optgroup label="🔒 Cyber Security">
+            <option>Cyber Security Analyst</option>
+            <option>Ethical Hacker</option>
+            <option>Penetration Tester</option>
+            <option>Security Engineer</option>
+            <option>SOC Analyst</option>
+        </optgroup>
+
+        <optgroup label="🗄 Database">
+            <option>Database Administrator</option>
+            <option>SQL Developer</option>
+            <option>MongoDB Developer</option>
+        </optgroup>
+
+        <optgroup label="🎨 UI / UX">
+            <option>UI Designer</option>
+            <option>UX Designer</option>
+            <option>UI/UX Designer</option>
+            <option>Graphic Designer</option>
+            <option>Product Designer</option>
+        </optgroup>
+
+        <optgroup label="🧪 Testing">
+            <option>QA Engineer</option>
+            <option>Software Tester</option>
+            <option>Automation Test Engineer</option>
+            <option>Manual Test Engineer</option>
+        </optgroup>
+
+        <optgroup label="📊 Management">
+            <option>Project Manager</option>
+            <option>Product Manager</option>
+            <option>Program Manager</option>
+            <option>Scrum Master</option>
+            <option>Business Analyst</option>
+        </optgroup>
+
+        <optgroup label="💼 HR & Recruitment">
+            <option>HR Executive</option>
+            <option>HR Manager</option>
+            <option>Technical Recruiter</option>
+            <option>Talent Acquisition Specialist</option>
+        </optgroup>
+
+        <optgroup label="📈 Marketing & Sales">
+            <option>Digital Marketing Executive</option>
+            <option>SEO Specialist</option>
+            <option>Content Writer</option>
+            <option>Social Media Manager</option>
+            <option>Sales Executive</option>
+            <option>Business Development Executive</option>
+        </optgroup>
+
+        <optgroup label="💰 Finance">
+            <option>Accountant</option>
+            <option>Financial Analyst</option>
+            <option>Chartered Accountant</option>
+            <option>Investment Analyst</option>
+        </optgroup>
+
+        <optgroup label="🏥 Healthcare">
+            <option>Doctor</option>
+            <option>Nurse</option>
+            <option>Pharmacist</option>
+            <option>Lab Technician</option>
+        </optgroup>
+
+        <optgroup label="🏗 Engineering">
+            <option>Mechanical Engineer</option>
+            <option>Civil Engineer</option>
+            <option>Electrical Engineer</option>
+            <option>Electronics Engineer</option>
+            <option>Automobile Engineer</option>
+        </optgroup>
+
+        <optgroup label="📚 Education">
+            <option>Teacher</option>
+            <option>Professor</option>
+            <option>Trainer</option>
+            <option>Academic Coordinator</option>
+        </optgroup>
+
+        <optgroup label="🎓 Entry Level">
+            <option>Intern</option>
+            <option>Graduate Trainee</option>
+            <option>Apprentice</option>
+            <option>Fresher</option>
+        </optgroup>
+
+        <optgroup label="➕ More Profiles">
+            <option>Mobile App Developer (Android)</option>
+            <option>Mobile App Developer (iOS)</option>
+            <option>Customer Support Executive</option>
+            <option>Operations Manager</option>
+        </optgroup>
+
+        <option value="__other__">✏️ Other (type your own)</option>
+
+    </select>
+
+    <input
+        type="text"
+        id="customTitleInput"
+        placeholder="Type your custom job profile title..."
+        onkeyup="document.getElementById('title').value = this.value;"
+        style="display:none; width:100%; padding:12px; border-radius:8px; margin-top:10px;"
+    >
+
+    <input type="hidden" id="title" name="title">
+</div>
+                <div class="input-group">
+                    <label for="job_description">Job Description (optional)</label>
+                    <textarea
+                        id="job_description"
+                        name="job_description"
+                        rows="5"
+                        placeholder="Paste job description / required skills..."
+                        style="width:100%; padding:10px; border-radius:8px;"
+                    ></textarea>
+                    <div class="input-hint">
+                        <i class="fa-solid fa-circle-info"></i>
+                        <span>
+                            If you provide a Job Description, each uploaded resume will be automatically
+                            matched against it (including JD Match % and Skill Gap analysis). Candidate
+                            shortlisting will be based on a combined score of both the ATS score and JD
+                            match. If left blank, candidates will be shortlisted based only on their ATS score.
+                        </span>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn" style="margin-top:8px;">
+                    <i class="fa-solid fa-check"></i> Create Profile
+                </button>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>
+<script>
+function handleTitleChange() {
+    const select = document.getElementById('titleSelect');
+    const customInput = document.getElementById('customTitleInput');
+    const hiddenTitle = document.getElementById('title');
+
+    if (select.value === '__other__') {
+        customInput.style.display = 'block';
+        customInput.value = '';
+        customInput.focus();
+        hiddenTitle.value = '';
+    } else {
+        customInput.style.display = 'none';
+        hiddenTitle.value = select.value;
+    }
+}
+
+function validateTitleBeforeSubmit() {
+    const title = document.getElementById('title').value.trim();
+
+    if (!title) {
+        alert('Please select or type a job profile title.');
+        return false;
+    }
+
+    return true;
+}
+</script>
+
+{% endblock %}

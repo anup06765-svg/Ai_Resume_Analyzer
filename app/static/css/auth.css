@@ -231,3 +231,139 @@
     }
 
 }
+
+/* ==========================================
+   Register - Role Selection Screen
+========================================== */
+
+.role-select-grid{
+
+    display:grid;
+
+    grid-template-columns:1fr 1fr;
+
+    gap:16px;
+
+    margin-top:10px;
+
+}
+
+.role-select-card{
+
+    display:flex;
+
+    flex-direction:column;
+
+    align-items:center;
+
+    text-align:center;
+
+    gap:8px;
+
+    padding:28px 16px;
+
+    border-radius:14px;
+
+    background:rgba(255,255,255,.08);
+
+    border:1px solid rgba(255,255,255,.20);
+
+    color:#ffffff;
+
+    text-decoration:none;
+
+    transition:.3s;
+
+}
+
+.role-select-card i{
+
+    font-size:26px;
+
+    color:#60a5fa;
+
+}
+
+.role-select-card h3{
+
+    margin:4px 0 0 0;
+
+    font-size:18px;
+
+}
+
+.role-select-card p{
+
+    color:#dbeafe;
+
+    font-size:13px;
+
+    line-height:1.5;
+
+}
+
+.role-select-card:hover{
+
+    background:rgba(255,255,255,.16);
+
+    border-color:#60a5fa;
+
+    transform:translateY(-2px);
+
+}
+
+@media (max-width:520px){
+
+    .role-select-grid{
+
+        grid-template-columns:1fr;
+
+    }
+
+}
+
+/* Chosen role badge on the actual register form */
+
+.chosen-role{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:10px;
+
+    margin-top:6px;
+
+    padding:12px 14px;
+
+    border-radius:10px;
+
+    background:rgba(255,255,255,.10);
+
+    border:1px solid rgba(255,255,255,.20);
+
+    color:#ffffff;
+
+    font-weight:600;
+
+}
+
+.chosen-role a{
+
+    margin-left:auto;
+
+    color:#93c5fd;
+
+    font-size:13px;
+
+    font-weight:bold;
+
+    text-decoration:none;
+
+}
+
+.chosen-role a:hover{
+
+    text-decoration:underline;
+
+}

@@ -74,6 +74,19 @@ Register | AI Resume Analyzer
 
             </div>
 
+            <div class="input-group">
+                <label>I am a</label>
+                <div class="chosen-role">
+                    {% if role == 'hr' %}
+                        <i class="fa-solid fa-briefcase"></i> HR / Recruiter
+                    {% else %}
+                        <i class="fa-solid fa-user"></i> Job Seeker / Candidate
+                    {% endif %}
+                    <a href="/auth/register">Change</a>
+                </div>
+                <input type="hidden" name="role" value="{{ role or 'candidate' }}">
+            </div>
+
             <button type="submit" class="btn-auth">
                 Create Account
             </button>

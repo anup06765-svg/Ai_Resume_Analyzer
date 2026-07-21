@@ -1,0 +1,52 @@
+<div class="logo">
+    <a href="/" class="logo-btn">
+        <i class="fa-solid fa-brain"></i>
+        <span>AI Resume - HR</span>
+    </a>
+</div>
+
+<ul class="menu">
+
+    <li class="{{ 'active' if active_page == 'dashboard' else '' }}">
+        <a href="/hr/dashboard" {{ 'style="font-weight:700;"'|safe if active_page == 'dashboard' else '' }}>
+            <i class="fa-solid fa-house"></i>
+            HR Dashboard
+        </a>
+    </li>
+
+    <li class="{{ 'active' if active_page == 'upload' else '' }}">
+        <a href="/resume/upload" {{ 'style="font-weight:700;"'|safe if active_page == 'upload' else '' }}>
+            <i class="fa-solid fa-upload"></i>
+            Upload Resume
+        </a>
+    </li>
+
+    <li class="{{ 'active' if active_page == 'create' else '' }}">
+        <a href="/hr/profile/create" {{ 'style="font-weight:700;"'|safe if active_page == 'create' else '' }}>
+            <i class="fa-solid fa-plus"></i>
+            New Job Profile
+        </a>
+    </li>
+
+    <li class="{{ 'active' if active_page == 'matching' else '' }}">
+        <a href="/job-matching" {{ 'style="font-weight:700;"'|safe if active_page == 'matching' else '' }}>
+            <i class="fa-solid fa-briefcase"></i>
+            Job Matching
+        </a>
+    </li>
+
+    <li class="{{ 'active' if active_page == 'profile' else '' }}">
+        <a href="/profile" {{ 'style="font-weight:700;"'|safe if active_page == 'profile' else '' }}>
+            <i class="fa-solid fa-user"></i>
+            Profile
+        </a>
+    </li>
+
+    <li>
+        <a href="/auth/logout">
+            <i class="fa-solid fa-right-from-bracket"></i>
+            Logout
+        </a>
+    </li>
+
+</ul>

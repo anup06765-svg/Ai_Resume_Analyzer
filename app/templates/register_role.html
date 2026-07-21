@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block title %}
+Register | AI Resume Analyzer
+{% endblock %}
+
+{% block content %}
+
+<div class="auth-container">
+
+    <div class="auth-card">
+
+        <h2>Create Your Account</h2>
+
+        <p class="auth-subtitle">
+            Tell us who you are so we can set up the right account for you.
+        </p>
+
+        <div class="role-select-grid">
+
+            <a href="/auth/register?role=candidate" class="role-select-card">
+                <i class="fa-solid fa-user"></i>
+                <h3>Job Seeker / Candidate</h3>
+                <p>Upload your resume, get ATS scores and AI suggestions.</p>
+            </a>
+
+            <a href="/auth/register?role=hr" class="role-select-card">
+                <i class="fa-solid fa-briefcase"></i>
+                <h3>HR / Recruiter</h3>
+                <p>Create job profiles and shortlist the best candidates.</p>
+            </a>
+
+        </div>
+
+        <p class="bottom-text">
+            Already have an account?
+
+            <a href="/auth/login">
+                Login
+            </a>
+
+        </p>
+
+    </div>
+
+</div>
+
+{% endblock %}

@@ -14,6 +14,7 @@ from sqlalchemy.orm import Session
 
 from app.database.database import get_db
 from app.dependencies.auth import login_required
+from app.models.hr_profile import HRProfile
 from app.models.resume import Resume
 
 from app.services.file_services import FileService
@@ -25,6 +26,12 @@ router = APIRouter(
     prefix="/resume",
     tags=["Resume"]
 )
+
+
+def get_post_upload_redirect(user) -> str:
+    if getattr(user, "role", None) == "hr":
+        return "/hr/dashboard"
+    return "/dashboard/"
 
 
 # ===================================================
@@ -140,7 +147,9 @@ async def upload_resume(
 
             parsed_text=parsed_text,
 
-            user_id=user.id
+            user_id=user.id,
+
+            hr_profile_id=_get_default_hr_profile_id(db, user)
 
         )
 
@@ -185,9 +194,41 @@ async def upload_resume(
     # -------------------------
 
     return RedirectResponse(
-        url="/dashboard/",
+        url=get_post_upload_redirect(user),
         status_code=status.HTTP_303_SEE_OTHER
     )
+
+
+def _get_default_hr_profile_id(db: Session, user) -> int | None:
+    if getattr(user, "role", None) != "hr":
+        return None
+
+    profile = (
+        db.query(HRProfile)
+        .filter(HRProfile.hr_id == user.id)
+        .order_by(HRProfile.id.desc())
+        .first()
+    )
+
+    if profile:
+        return profile.id
+
+    # HR ka abhi tak koi Job Profile nahi hai (isliye resume kisi se
+    # bhi link nahi ho paata aur HR Dashboard par hamesha 0 dikhta
+    # hai). Isse bachne ke liye ek default "General" profile khud
+    # bana dete hain, taaki resume kabhi bhi orphan (hr_profile_id
+    # = None) na rahe aur dashboard par turant count ho jaaye.
+
+    default_profile = HRProfile(
+        title="General",
+        hr_id=user.id
+    )
+
+    db.add(default_profile)
+    db.commit()
+    db.refresh(default_profile)
+
+    return default_profile.id
 
 
 # ===================================================

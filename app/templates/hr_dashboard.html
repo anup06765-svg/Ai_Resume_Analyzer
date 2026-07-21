@@ -1,0 +1,159 @@
+{% extends "dashboard_base.html" %}
+
+{% block title %}
+HR Dashboard
+{% endblock %}
+
+{% block content %}
+
+<div class="dashboard">
+
+    <aside class="sidebar">
+
+        {% set active_page = 'dashboard' %}
+        {% include "partials/hr_sidebar.html" %}
+
+    </aside>
+
+    <div class="main-content">
+
+        <div class="topbar">
+            <div class="search-box">
+                <input type="text" id="profileSearch" placeholder="Search Job Profile..." onkeyup="filterProfiles()">
+            </div>
+
+            <div class="top-right">
+                <div class="profile-box">
+                    <div class="avatar">{{ user.full_name[0] }}</div>
+                    <div>
+                        <strong>{{ user.full_name }}</strong>
+                        <small>{{ user.email }}</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="welcome">
+            <h1>Welcome, {{ user.full_name }}</h1>
+            <p>
+                This is your dedicated HR dashboard, where you can manage your job postings and view candidates who have applied for them.
+            </p>
+        </div>
+
+        <div class="dashboard-grid">
+            <div class="summary" style="grid-column: 1 / -1;">
+                <div class="summary-card">
+                    <h3>Total Job Profiles</h3>
+                    <h1>{{ total_profiles }}</h1>
+                </div>
+                <div class="summary-card">
+                    <h3>Total Candidates</h3>
+                    <h1>{{ total_candidates }}</h1>
+                </div>
+                <div class="summary-card">
+                    <h3>Total Shortlisted</h3>
+                    <h1>{{ total_shortlisted }}</h1>
+                </div>
+                <div class="summary-card">
+                    <h3>Avg. Candidate Score</h3>
+                    <h1>{{ avg_score }}</h1>
+                </div>
+                {% if not profile_cards %}
+                <div class="summary-card" style="grid-column: 1 / -1; background:#eff6ff; border:1px solid #bfdbfe;">
+                    <h3 style="margin-bottom: 6px;">Upload status</h3>
+                    <p style="margin:0; color:#1e3a8a;">Create a job profile and upload resumes here to see candidate counts appear.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="analytics-section">
+
+            <h2>Your Job Profiles</h2>
+
+            {% if profile_cards %}
+
+            <div class="analytics-grid" id="profileGrid">
+
+                {% for card in profile_cards %}
+
+                <div class="analytics-card profile-card" data-title="{{ card.profile.title|lower }}">
+
+                    <form
+                        action="/hr/profile/{{ card.profile.id }}/delete"
+                        method="POST"
+                        class="profile-delete-form"
+                        onsubmit="return confirm('Are you sure you want to delete this job profile and all of its associated candidates? This action cannot be undone.');"
+                    >
+                        <button type="submit" class="delete-btn" title="Delete Job Profile">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </form>
+
+                    <a href="/hr/profile/{{ card.profile.id }}" class="profile-card-link">
+
+                        <h3>
+                            <i class="fa-solid fa-briefcase"></i> {{ card.profile.title }}
+                            {% if card.has_jd %}
+                            <span title="JD matching enabled" style="font-size:0.7rem; background:#1f9d55; color:white; padding:2px 8px; border-radius:10px; margin-left:6px;">JD</span>
+                            {% endif %}
+                        </h3>
+
+                        <h1>{{ card.total }}</h1>
+
+                        <p>
+                            Resumes uploaded: {{ card.total }} <br>
+                            
+                            shortlisted {{ card.shortlisted }} <br>
+                        
+                            Best score: {{ card.best_score }}
+                        </p>
+
+                        
+
+                    </a>
+
+                </div>
+
+                {% endfor %}
+
+            </div>
+
+            <p id="noProfileMatch" style="display:none; color:#94a3b8;">No job profile matches your search.</p>
+
+            {% else %}
+
+            <div class="empty-state">
+                <h3>No Job Profile Yet</h3>
+                <p>Create a job profile, then bulk-upload candidate resumes into it.</p>
+                <a href="/hr/profile/create" class="btn">Create Job Profile</a>
+            </div>
+
+            {% endif %}
+
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+function filterProfiles() {
+    const query = document.getElementById('profileSearch').value.toLowerCase().trim();
+    const cards = document.querySelectorAll('#profileGrid .profile-card');
+    let visibleCount = 0;
+
+    cards.forEach(function (card) {
+        const matches = card.getAttribute('data-title').includes(query);
+        card.style.display = matches ? '' : 'none';
+        if (matches) visibleCount++;
+    });
+
+    const noMatchMsg = document.getElementById('noProfileMatch');
+    if (noMatchMsg) {
+        noMatchMsg.style.display = visibleCount === 0 ? 'block' : 'none';
+    }
+}
+</script>
+
+{% endblock %}

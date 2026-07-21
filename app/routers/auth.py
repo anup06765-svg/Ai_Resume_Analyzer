@@ -26,30 +26,49 @@ from app.crud.user_crud import (
     authenticate_user
 )
 
+
+def _dashboard_url_for_role(role: str) -> str:
+    if role == "hr":
+        return "/hr/dashboard"
+    return "/dashboard/"
+
 # ============================
 # Register Page
 # ============================
 
 
 @router.get("/register")
-def register_page(request: Request):
+def register_page(request: Request, role: str = None):
     # Agar user already logged in hai, register page mat dikhao,
     # seedha dashboard bhej do (back button issue fix)
     if request.session.get("user_id"):
         return RedirectResponse(
-            url="/dashboard/",
+            url=_dashboard_url_for_role(request.session.get("role")),
             status_code=status.HTTP_303_SEE_OTHER
         )
 
     templates = request.app.state.templates
-    response = templates.TemplateResponse(
-        "register.html",
-        {
-            "request": request,
-            "error": None,
-            "success": None
-        }
-    )
+
+    # Pehle Register par click karte hi HR ya Candidate chunne ka
+    # option dikhao. Jab tak valid role query param na aaye
+    # (candidate/hr), register form dikhaye hi nahi.
+    if role not in ("candidate", "hr"):
+        response = templates.TemplateResponse(
+            "register_role.html",
+            {
+                "request": request
+            }
+        )
+    else:
+        response = templates.TemplateResponse(
+            "register.html",
+            {
+                "request": request,
+                "error": None,
+                "success": None,
+                "role": role
+            }
+        )
 
     # Browser ko is page ko cache/bfcache me store karne se roko
     response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
@@ -74,6 +93,8 @@ def register_user(
 
     password: str = Form(...),
 
+    role: str = Form("candidate"),
+
     db: Session = Depends(get_db)
 
 ):
@@ -91,7 +112,8 @@ def register_user(
             {
                 "request": request,
                 "error": "Email already registered.",
-                "success": None
+                "success": None,
+                "role": role
             }
         )
 
@@ -99,7 +121,8 @@ def register_user(
     db=db,
     full_name=full_name,
     email=email,
-    password=password
+    password=password,
+    role=role
 )
 
     return RedirectResponse(
@@ -122,7 +145,7 @@ def login_page(request: Request):
     # seedha dashboard bhej do (back button issue fix)
     if request.session.get("user_id"):
         return RedirectResponse(
-            url="/dashboard/",
+            url=_dashboard_url_for_role(request.session.get("role")),
             status_code=status.HTTP_303_SEE_OTHER
         )
 
@@ -191,9 +214,11 @@ def login_user(
 
     request.session["user_name"] = user.full_name
 
+    request.session["role"] = user.role
+
     return RedirectResponse(
 
-        url="/dashboard/",
+        url=_dashboard_url_for_role(user.role),
 
         status_code=status.HTTP_303_SEE_OTHER
 

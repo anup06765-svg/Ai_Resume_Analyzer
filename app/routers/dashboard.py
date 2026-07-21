@@ -4,7 +4,7 @@ from fastapi import APIRouter, Request, Depends
 from sqlalchemy.orm import Session
 
 from app.database.database import get_db
-from app.dependencies.auth import login_required
+from app.dependencies.auth import candidate_required
 from app.models.resume import Resume
 
 router = APIRouter(
@@ -17,7 +17,7 @@ router = APIRouter(
 def dashboard(
     request: Request,
     db: Session = Depends(get_db),
-    user=Depends(login_required)
+    user=Depends(candidate_required)
 ):
 
     # ------------------------------------

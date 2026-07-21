@@ -48,3 +48,41 @@ def login_required(
         request=request,
         db=db
     )
+
+def hr_required(
+    request: Request,
+    db: Session = Depends(get_db)
+):
+    """
+    Sirf HR role wale users ko HR section me aane deta hai.
+    """
+
+    user = get_current_user(request=request, db=db)
+
+    if user.role != "hr":
+        raise HTTPException(
+            status_code=status.HTTP_303_SEE_OTHER,
+            headers={"Location": "/dashboard/"}
+        )
+
+    return user
+
+
+def candidate_required(
+    request: Request,
+    db: Session = Depends(get_db)
+):
+    """
+    Agar HR galti se candidate dashboard par aa jaaye to
+    use uske apne HR dashboard par bhej do.
+    """
+
+    user = get_current_user(request=request, db=db)
+
+    if user.role == "hr":
+        raise HTTPException(
+            status_code=status.HTTP_303_SEE_OTHER,
+            headers={"Location": "/hr/dashboard"}
+        )
+
+    return user

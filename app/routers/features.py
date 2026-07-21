@@ -1,12 +1,15 @@
 import json
 
-from fastapi import APIRouter, Request, Depends, Form, HTTPException
+from fastapi import APIRouter, Request, Depends, Form, HTTPException, UploadFile, File
 from sqlalchemy.orm import Session
 
 from app.database.database import get_db
 from app.dependencies.auth import login_required
 from app.models.resume import Resume
 from app.services.jd_matching_service import jd_matching_service
+from app.services.file_services import FileService
+from app.services.pdf_parser import PDFParser
+from app.services.nlp_service import resume_nlp_service
 from app.models.contact import ContactMessage
 from fastapi.responses import RedirectResponse,FileResponse
 from app.services.email_service import send_contact_email
@@ -134,14 +137,33 @@ def job_matching_page(
     db: Session = Depends(get_db),
     user=Depends(login_required)
 ):
+    templates = request.app.state.templates
+
+    # HR ke liye candidate resumes ki list nahi dikhani (wo bulk
+    # upload se judi hoti hai aur profile-dar-profile badhti jaati
+    # hai) - HR seedha apna test resume upload karke JD match kare.
+    if getattr(user, "role", None) == "hr":
+
+        return templates.TemplateResponse(
+            "job_matching.html",
+            {
+                "request": request,
+                "user": user,
+                "resumes": [],
+                "result": None,
+                "match_offset": None,
+                "selected_resume_id": None,
+                "jd_text": "",
+                "error": None
+            }
+        )
+
     resumes = (
         db.query(Resume)
         .filter(Resume.user_id == user.id)
         .order_by(Resume.id.desc())
         .all()
     )
-
-    templates = request.app.state.templates
 
     return templates.TemplateResponse(
         "job_matching.html",
@@ -163,21 +185,160 @@ def job_matching_page(
 # ===================================================
 
 @router.post("/job-matching")
-def job_matching_analyze(
+async def job_matching_analyze(
     request: Request,
-    resume_id: int = Form(...),
     jd_text: str = Form(...),
+    resume_id: int = Form(None),
+    resume_file: UploadFile = File(None),
     db: Session = Depends(get_db),
     user=Depends(login_required)
 ):
+    templates = request.app.state.templates
+
+    is_hr = getattr(user, "role", None) == "hr"
+
+    # -------------------------------------------------
+    # HR: seedha ek ad-hoc resume file upload karke JD
+    # match karo. Ye resume kisi bhi candidate list me
+    # save/dikhaya nahi jaata - sirf isi analysis ke liye
+    # use hota hai aur turant disk se hata diya jaata hai.
+    # -------------------------------------------------
+
+    if is_hr:
+
+        if not jd_text or not jd_text.strip():
+
+            return templates.TemplateResponse(
+                "job_matching.html",
+                {
+                    "request": request,
+                    "user": user,
+                    "resumes": [],
+                    "result": None,
+                    "match_offset": None,
+                    "selected_resume_id": None,
+                    "jd_text": jd_text,
+                    "error": "Please paste a job description before analyzing."
+                }
+            )
+
+        if not resume_file or not resume_file.filename:
+
+            return templates.TemplateResponse(
+                "job_matching.html",
+                {
+                    "request": request,
+                    "user": user,
+                    "resumes": [],
+                    "result": None,
+                    "match_offset": None,
+                    "selected_resume_id": None,
+                    "jd_text": jd_text,
+                    "error": "Please upload a resume PDF to match against."
+                }
+            )
+
+        valid, error = await FileService.validate_pdf(resume_file)
+
+        if not valid:
+
+            return templates.TemplateResponse(
+                "job_matching.html",
+                {
+                    "request": request,
+                    "user": user,
+                    "resumes": [],
+                    "result": None,
+                    "match_offset": None,
+                    "selected_resume_id": None,
+                    "jd_text": jd_text,
+                    "error": error
+                }
+            )
+
+        success, filename, error = await FileService.save_pdf(resume_file)
+
+        if not success:
+
+            return templates.TemplateResponse(
+                "job_matching.html",
+                {
+                    "request": request,
+                    "user": user,
+                    "resumes": [],
+                    "result": None,
+                    "match_offset": None,
+                    "selected_resume_id": None,
+                    "jd_text": jd_text,
+                    "error": error
+                }
+            )
+
+        try:
+
+            parsed_text = PDFParser.extract_text(f"app/uploads/{filename}")
+
+            resume_skills = resume_nlp_service.analyze_resume(parsed_text).get("skills", [])
+
+        except Exception as e:
+
+            FileService.delete_file(filename)
+
+            return templates.TemplateResponse(
+                "job_matching.html",
+                {
+                    "request": request,
+                    "user": user,
+                    "resumes": [],
+                    "result": None,
+                    "match_offset": None,
+                    "selected_resume_id": None,
+                    "jd_text": jd_text,
+                    "error": str(e)
+                }
+            )
+
+        # Ad-hoc test ke baad file disk se hata do - ye kisi
+        # candidate list ka hissa nahi banti.
+        FileService.delete_file(filename)
+
+        result = jd_matching_service.analyze(
+            resume_skills=resume_skills,
+            jd_text=jd_text
+        )
+
+        radius = 90
+        circumference = 2 * 3.1416 * radius
+
+        match_offset = circumference - (
+            result["matching_score"] / 100
+        ) * circumference
+
+        return templates.TemplateResponse(
+            "job_matching.html",
+            {
+                "request": request,
+                "user": user,
+                "resumes": [],
+                "result": result,
+                "match_offset": match_offset,
+                "selected_resume_id": None,
+                "jd_text": jd_text,
+                "error": None
+            }
+        )
+
+    # -------------------------------------------------
+    # Candidate: purana flow - apne saved resumes me se
+    # ek select karo
+    # -------------------------------------------------
+
     resumes = (
         db.query(Resume)
         .filter(Resume.user_id == user.id)
         .order_by(Resume.id.desc())
         .all()
     )
-
-    templates = request.app.state.templates
 
     selected_resume = (
         db.query(Resume)
@@ -331,26 +492,22 @@ def profile_page(
     Shows the logged-in user's profile details and resume stats.
     """
 
-    total_resumes = (
-        db.query(Resume)
-        .filter(Resume.user_id == user.id)
-        .count()
-    )
+    stats_query = db.query(Resume).filter(Resume.user_id == user.id)
 
-    latest_resume = (
-        db.query(Resume)
-        .filter(Resume.user_id == user.id)
-        .order_by(Resume.id.desc())
-        .first()
-    )
+    # HR ke liye stats sirf un resumes se banti hain jo kisi
+    # Job Profile ke andar hain (hr_profile_id set hai). Isse
+    # Job Profile se resumes delete karne par ye stats bhi
+    # turant sync me update hoti hain.
+    if getattr(user, "role", None) == "hr":
+        stats_query = stats_query.filter(Resume.hr_profile_id.isnot(None))
+
+    total_resumes = stats_query.count()
+
+    latest_resume = stats_query.order_by(Resume.id.desc()).first()
 
     average_ats_score = 0
 
-    resumes = (
-        db.query(Resume)
-        .filter(Resume.user_id == user.id)
-        .all()
-    )
+    resumes = stats_query.all()
 
     if resumes:
 
@@ -366,7 +523,8 @@ def profile_page(
             "user": user,
             "total_resumes": total_resumes,
             "latest_resume": latest_resume,
-            "average_ats_score": average_ats_score
+            "average_ats_score": average_ats_score,
+            "active_page": "profile"
         }
     )
 
@@ -704,4 +862,160 @@ def download_ats_report_pdf(
         iter([buffer.getvalue()]),
         media_type="application/pdf",
         headers={"Content-Disposition": "attachment; filename=ats_report.pdf"}
+    )
+
+
+# ===================================================
+# Download Job Matching Report as PDF (ATS + JD Match)
+# ===================================================
+
+@router.post("/job-matching/pdf")
+def download_job_matching_pdf(
+    request: Request,
+    resume_id: int = Form(...),
+    jd_text: str = Form(...),
+    db: Session = Depends(get_db),
+    user=Depends(login_required)
+):
+    """
+    Job Matching result ko ek professional PDF report ki tarah
+    download karta hai - jisme resume ka ATS score aur us Job
+    Description ke saath ka Match Score, dono ek saath hote hain.
+    """
+
+    resume = (
+        db.query(Resume)
+        .filter(
+            Resume.id == resume_id,
+            Resume.user_id == user.id
+        )
+        .first()
+    )
+
+    if not resume:
+        raise HTTPException(status_code=404, detail="Resume not found.")
+
+    if not jd_text or not jd_text.strip():
+        raise HTTPException(status_code=400, detail="Job description is required.")
+
+    resume_skills = []
+    if resume.analysis_result:
+        try:
+            analysis = json.loads(resume.analysis_result)
+            resume_skills = analysis.get("analysis", {}).get("skills", [])
+        except Exception:
+            resume_skills = []
+
+    result = jd_matching_service.analyze(
+        resume_skills=resume_skills,
+        jd_text=jd_text
+    )
+
+    ats_score = resume.ats_score or 0
+    ats_grade = resume.ats_grade or "N/A"
+
+    # ------------------------------------
+    # Generate PDF
+    # ------------------------------------
+
+    buffer = BytesIO()
+    doc = SimpleDocTemplate(
+        buffer,
+        pagesize=letter,
+        rightMargin=0.75*inch,
+        leftMargin=0.75*inch,
+        topMargin=0.75*inch,
+        bottomMargin=0.75*inch
+    )
+
+    styles = getSampleStyleSheet()
+    title_style = ParagraphStyle(
+        'CustomTitle',
+        parent=styles['Heading1'],
+        fontSize=24,
+        textColor=colors.HexColor('#2563eb'),
+        spaceAfter=12,
+        alignment=1
+    )
+
+    heading_style = ParagraphStyle(
+        'CustomHeading',
+        parent=styles['Heading2'],
+        fontSize=14,
+        textColor=colors.HexColor('#1e293b'),
+        spaceAfter=10,
+        spaceBefore=10
+    )
+
+    normal_style = ParagraphStyle(
+        'CustomNormal',
+        parent=styles['BodyText'],
+        fontSize=11,
+        textColor=colors.HexColor('#475569'),
+        spaceAfter=6
+    )
+
+    elements = []
+
+    # Title
+    elements.append(Paragraph("Job Match Report", title_style))
+    elements.append(Paragraph(f"Resume: {resume.filename}", normal_style))
+    elements.append(Spacer(1, 0.2*inch))
+
+    # Scores section
+    elements.append(Paragraph("Overall Scores", heading_style))
+    score_table_data = [
+        ["ATS Score", "Grade", "Job Match Score"],
+        [f"{ats_score}/100", ats_grade, f"{result['matching_score']}%"]
+    ]
+    score_table = Table(score_table_data, colWidths=[1.7*inch, 1.7*inch, 1.7*inch])
+    score_table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#2563eb')),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('FONTSIZE', (0, 0), (-1, 0), 12),
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+        ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
+        ('GRID', (0, 0), (-1, -1), 1, colors.black)
+    ]))
+    elements.append(score_table)
+    elements.append(Spacer(1, 0.2*inch))
+
+    # Job description
+    elements.append(Paragraph("Job Description", heading_style))
+    elements.append(Paragraph(jd_text.replace("\n", "<br/>"), normal_style))
+    elements.append(Spacer(1, 0.2*inch))
+
+    # Skills comparison
+    elements.append(Paragraph("Skills Comparison", heading_style))
+    elements.append(Paragraph(
+        f"Matched Skills ({len(result['matched_skills'])}): "
+        f"{', '.join(result['matched_skills']) if result['matched_skills'] else 'None'}",
+        normal_style
+    ))
+    elements.append(Paragraph(
+        f"Missing Skills ({len(result['missing_skills'])}): "
+        f"{', '.join(result['missing_skills']) if result['missing_skills'] else 'None'}",
+        normal_style
+    ))
+    elements.append(Paragraph(
+        f"Extra Skills ({len(result['extra_skills'])}): "
+        f"{', '.join(result['extra_skills']) if result['extra_skills'] else 'None'}",
+        normal_style
+    ))
+    elements.append(Spacer(1, 0.2*inch))
+
+    # AI Suggestions
+    elements.append(Paragraph("AI Suggestions", heading_style))
+    for suggestion in result.get("ai_suggestions", []):
+        elements.append(Paragraph(f"• {suggestion}", normal_style))
+
+    doc.build(elements)
+    buffer.seek(0)
+
+    return StreamingResponse(
+        iter([buffer.getvalue()]),
+        media_type="application/pdf",
+        headers={"Content-Disposition": "attachment; filename=job_match_report.pdf"}
     )

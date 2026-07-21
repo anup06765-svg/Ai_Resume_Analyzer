@@ -12,6 +12,12 @@ Profile
 
     <aside class="sidebar">
 
+        {% if user.role == 'hr' %}
+
+            {% include "partials/hr_sidebar.html" %}
+
+        {% else %}
+
         <div class="logo">
     <a href="/" class="logo-btn">
         <i class="fa-solid fa-brain"></i>
@@ -54,6 +60,8 @@ Profile
             </li>
 
         </ul>
+
+        {% endif %}
 
     </aside>
 
@@ -129,9 +137,11 @@ Profile
         <h3>📄 Upload New Resume</h3>
     </a>
 
+    {% if user.role != 'hr' %}
     <a href="/resume/history" class="analytics-card">
         <h3>📁 View Resume History</h3>
     </a>
+    {% endif %}
 
     <a href="/change-password" class="analytics-card">
         <h3>🔒 Change Password</h3>

@@ -17,6 +17,7 @@ from app.routers import dashboard
 from app.routers import resume
 from app.routers import analysis
 from app.routers import features
+from app.routers import hr
 
 # Create Database Tables
 create_tables()
@@ -70,6 +71,7 @@ app.include_router(dashboard.router)
 app.include_router(resume.router)
 app.include_router(analysis.router)
 app.include_router(features.router)
+app.include_router(hr.router)
 
 # Health Check
 @app.get("/health")

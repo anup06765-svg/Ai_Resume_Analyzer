@@ -12,12 +12,19 @@ Job Matching
 
     <aside class="sidebar">
 
+        {% if user.role == 'hr' %}
+
+        {% set active_page = 'matching' %}
+        {% include "partials/hr_sidebar.html" %}
+
+        {% else %}
+
         <div class="logo">
-    <a href="/" class="logo-btn">
-        <i class="fa-solid fa-brain"></i>
-        <span>AI Resume</span>
-    </a>
-</div>
+            <a href="/" class="logo-btn">
+                <i class="fa-solid fa-brain"></i>
+                <span>AI Resume</span>
+            </a>
+        </div>
 
         <ul class="menu">
 
@@ -55,6 +62,8 @@ Job Matching
 
         </ul>
 
+        {% endif %}
+
     </aside>
 
     <!-- ================= Main Content ================= -->
@@ -66,7 +75,59 @@ Job Matching
             <p>Paste a job description to see how well your resume matches.</p>
         </div>
 
-        {% if not resumes %}
+        {% if user.role == 'hr' %}
+
+        <!-- ================= HR: Ad-hoc Resume Upload ================= -->
+
+        <div class="resume-details">
+
+            <div class="detail-box">
+
+                <form method="post" action="/job-matching" enctype="multipart/form-data">
+
+                    <label for="resume_file"><strong>Upload Resume to Test</strong></label><br>
+
+                    <input
+                        type="file"
+                        name="resume_file"
+                        id="resume_file"
+                        accept=".pdf"
+                        required
+                        style="margin-top: 6px;"
+                    >
+
+                    <p style="color:#94a3b8; font-size:0.85rem; margin-top:8px;">
+                        This resume will be used only for this one-time match. It will not be saved in any candidate list or job profile.
+                    </p>
+
+                    <br>
+
+                    <label for="jd_text"><strong>Job Description</strong></label><br>
+
+                    <textarea
+                        name="jd_text"
+                        id="jd_text"
+                        rows="8"
+                        style="width: 100%; padding: 10px; border-radius: 8px; margin-top: 6px;"
+                        placeholder="Paste the job description here... e.g. We are looking for a Python developer skilled in Django, FastAPI, SQL, Docker and Git."
+                        required
+                    >{{ jd_text }}</textarea>
+
+                    <br><br>
+
+                    <button type="submit" class="btn">Analyze Match</button>
+
+                </form>
+
+                {% if error %}
+                <p style="color: #ff6b6b; margin-top: 10px;">⚠ {{ error }}</p>
+                {% endif %}
+
+            </div>
+
+        </div>
+
+        {% elif not resumes %}
 
         <div class="resume-details">
 
