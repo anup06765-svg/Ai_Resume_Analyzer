@@ -26,6 +26,21 @@ class HRProfile(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
 
     # ==========================
+    # HR-configurable shortlisting settings
+    # (pehle ye sab hardcoded the — ab har profile ke liye
+    # HR khud apni marzi se ye values set kar sakta hai)
+    # ==========================
+
+    # Kitna Combined Score chahiye taaki candidate seedhe
+    # "Shortlisted" mark ho jaaye (pehle hardcoded 70 tha)
+    shortlist_threshold = Column(Integer, default=70, nullable=False)
+
+    # Combined Score banane me ATS score aur JD Match score ka
+    # kitna weightage (%) rahega (pehle hardcoded 50/50 tha)
+    ats_weight = Column(Integer, default=50, nullable=False)
+    jd_weight = Column(Integer, default=50, nullable=False)
+
+    # ==========================
     # Owner (HR user)
     # ==========================
 

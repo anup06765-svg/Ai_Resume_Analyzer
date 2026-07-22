@@ -56,6 +56,11 @@ def _run_light_migrations():
             ("jd_missing_skills", "TEXT"),
             ("combined_score", "INTEGER NOT NULL DEFAULT 0"),
         ],
+        "hr_profiles": [
+            ("shortlist_threshold", "INTEGER NOT NULL DEFAULT 70"),
+            ("ats_weight", "INTEGER NOT NULL DEFAULT 50"),
+            ("jd_weight", "INTEGER NOT NULL DEFAULT 50"),
+        ],
     }
 
     with engine.connect() as conn:

@@ -22,7 +22,7 @@ Create Job Profile
             <p>Create a job profile and bulk upload candidate resumes for screening.</p>
         </div>
 
-        <div class="detail-box" style="max-width:650px;">
+        <div class="detail-box" style="max-width:auto;">
 
             <p class="form-card-heading">New Job Profile Details</p>
 
@@ -32,11 +32,11 @@ Create Job Profile
 
             <form action="/hr/profile/create" method="POST" onsubmit="return validateTitleBeforeSubmit();">
                 <div class="input-group">
-    <label for="title">
-        <i class="fas fa-briefcase"></i> Profile / Job Title
-    </label>
+                    <label for="titleSelect">
+                        <i class="fas fa-briefcase"></i> Profile / Job Title
+                    </label>
 
-    <select id="titleSelect" onchange="handleTitleChange()" required>
+                    <select id="titleSelect" onchange="handleTitleChange()" required>
         <option value="" selected disabled>Select a Job Profile</option>
 
 
@@ -177,26 +177,28 @@ Create Job Profile
 
         <option value="__other__">✏️ Other (type your own)</option>
 
-    </select>
+                    </select>
 
-    <input
-        type="text"
-        id="customTitleInput"
-        placeholder="Type your custom job profile title..."
-        onkeyup="document.getElementById('title').value = this.value;"
-        style="display:none; width:100%; padding:12px; border-radius:8px; margin-top:10px;"
-    >
+                    <input
+                        type="text"
+                        id="customTitleInput"
+                        placeholder="Type your custom job profile title..."
+                        onkeyup="document.getElementById('title').value = this.value;"
+                        style="display:none; margin-top:10px;"
+                    >
 
-    <input type="hidden" id="title" name="title">
-</div>
+                    <input type="hidden" id="title" name="title">
+                </div>
+
                 <div class="input-group">
-                    <label for="job_description">Job Description (optional)</label>
+                    <label for="job_description">
+                        <i class="fa-solid fa-file-lines"></i> Job Description (optional)
+                    </label>
                     <textarea
                         id="job_description"
                         name="job_description"
                         rows="5"
                         placeholder="Paste job description / required skills..."
-                        style="width:100%; padding:10px; border-radius:8px;"
                     ></textarea>
                     <div class="input-hint">
                         <i class="fa-solid fa-circle-info"></i>
@@ -205,6 +207,66 @@ Create Job Profile
                             matched against it (including JD Match % and Skill Gap analysis). Candidate
                             shortlisting will be based on a combined score of both the ATS score and JD
                             match. If left blank, candidates will be shortlisted based only on their ATS score.
+                        </span>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label for="shortlist_threshold">
+                        <i class="fa-solid fa-filter"></i> Shortlist Threshold (Combined Score %)
+                    </label>
+                    <input
+                        type="number"
+                        id="shortlist_threshold"
+                        name="shortlist_threshold"
+                        min="0"
+                        max="100"
+                        placeholder="Enter value (1 - 100)"
+                    >
+                    <div class="input-hint">
+                        <i class="fa-solid fa-circle-info"></i>
+                        <span>
+                            Any candidate whose Combined Score is greater than or equal to this value will
+                            automatically be marked as Shortlisted. You decide the cutoff for this profile.
+                        </span>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label>
+                        <i class="fa-solid fa-scale-balanced"></i> Combined Score Weightage (%)
+                    </label>
+                    <div class="weightage-row">
+                        <div class="weightage-field">
+                            <span class="sub-label">ATS Score weight</span>
+                            <input
+                                type="number"
+                                id="ats_weight"
+                                name="ats_weight"
+                                min="0"
+                                max="100"
+                                placeholder="Enter value (1 - 100)"
+                            >
+                        </div>
+                        <div class="weightage-field">
+                            <span class="sub-label">JD Match weight</span>
+                            <input
+                                type="number"
+                                id="jd_weight"
+                                name="jd_weight"
+                                min="0"
+                                max="100"
+                                placeholder="Enter value (1 - 100)"
+                            >
+                        </div>
+                    </div>
+                    <div class="input-hint">
+                        <i class="fa-solid fa-circle-info"></i>
+                        <span>
+                            Decide how much the ATS score vs the JD Match % should count towards the
+                            Combined Score. Whatever you enter is saved exactly as-is (they don't need
+                            to add up to 100 — the ratio is balanced automatically when scoring). This
+                            only applies when a Job Description is provided.
                         </span>
                     </div>
                 </div>
